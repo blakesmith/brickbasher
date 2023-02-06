@@ -2,7 +2,7 @@ ROM = unbricked.gb
 
 all: $(ROM)
 
-SOURCE_FILES=main.asm
+SOURCE_FILES=main.asm input.asm tiles.asm
 OBJECT_FILES=$(subst .asm,.o,$(SOURCE_FILES))
 
 %.o: %.asm

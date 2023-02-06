@@ -101,6 +101,7 @@ MovePaddle:
 .check_left
         ld a, [wCurKeys]
         and a, PADF_LEFT
+        jr nz, .move_left
         jr z, .check_right
 .move_left
         ld a, [_OAMRAM + 1]
@@ -114,6 +115,7 @@ MovePaddle:
 .check_right
         ld a, [wCurKeys]
         and a, PADF_RIGHT
+        jr nz, .move_right
         ret z
 
 .move_right

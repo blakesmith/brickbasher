@@ -15,6 +15,14 @@ MACRO EnableLCD
         ld [rLCDC], a
 ENDM
 
+MACRO InitDisplayRegisters
+        ; During the first (blank) frame, initialize the display registers
+        ld a, %1100100
+        ld [rBGP], a
+        ld a, %11100100
+        ld [rOBP0], a
+ENDM
+
 SECTION "Header", ROM0[$100]
         jp Init
         ds $150 - @, 0          ; Make room for the header
@@ -22,7 +30,13 @@ SECTION "Header", ROM0[$100]
 Init:
         call WaitVBlank
         DisableLCD
+        call InitTileData
+        call InitOAM
+        EnableLCD
+        InitDisplayRegisters
+        jp Main
 
+InitTileData:
         ; Copy tile data
         ld de, Tiles
         ld hl, $9000
@@ -35,6 +49,15 @@ Init:
         ld bc, TilemapEnd - Tilemap
         call Memcopy
 
+        ; Copy paddle tile data
+        ld de, Paddle
+        ld hl, $8000
+        ld bc, PaddleEnd - Paddle
+        call Memcopy
+
+        ret
+
+InitOAM:
         ; Clear OAM memory
         ld a, 0
         ld b, SCREEN_WIDTH
@@ -53,20 +76,7 @@ Init:
         ld a, 0
         ld [hli], a
         ld [hl], a
-
-        ; Copy paddle tile data
-        ld de, Paddle
-        ld hl, $8000
-        ld bc, PaddleEnd - Paddle
-        call Memcopy
-
-        EnableLCD
-
-        ; During the first (blank) frame, initialize the display registers
-        ld a, %1100100
-        ld [rBGP], a
-        ld a, %11100100
-        ld [rOBP0], a
+        ret
 
 Main:
         call WaitNotVBlank

@@ -29,6 +29,7 @@ Init:
         DisableLCD
         call InitTileData
         call InitOAM
+        call CopyDMARoutine
         EnableLCD
         InitDisplayRegisters
         jp Main
@@ -54,32 +55,11 @@ InitTileData:
 
         ret
 
-InitOAM:
-        ; Clear OAM memory
-        ld a, 0
-        ld b, SCRN_X
-        ld hl, _OAMRAM
-.clear_oam
-        ld [hli], a
-        dec b
-        jp nz, .clear_oam
-        
-        ; Fill in OAM
-        ld hl, _OAMRAM
-        ld a, 128 + 16
-        ld [hli], a
-        ld a, 16 + 8
-        ld [hli], a
-        ld a, 0
-        ld [hli], a
-        ld [hl], a
-        ret
-
 Main:
-        call WaitNotVBlank
         call WaitVBlank
         call ReadInput
         call MovePaddle
+        call CopyOAM
         jp Main
 
 WaitNotVBlank:
@@ -116,12 +96,12 @@ MovePaddle:
         jr nz, .move_left
         jr z, .check_right
 .move_left
-        ld a, [_OAMRAM + 1]
+        ld a, [paddle_oam_x]
         dec a
         ;;  If we're already at the end of the playfield, don't move
         cp a, 15
         ret z
-        ld [_OAMRAM + 1], a
+        ld [paddle_oam_x], a
         ret
 
 .check_right
@@ -131,11 +111,11 @@ MovePaddle:
         ret z
 
 .move_right
-        ld a, [_OAMRAM + 1]
+        ld a, [paddle_oam_x]
         inc a
         ;;  If we're already at the end of the playfield, don't move
         cp a, 105
         ret z
-        ld [_OAMRAM + 1], a
+        ld [paddle_oam_x], a
         ret
 

@@ -1,8 +1,5 @@
 INCLUDE "hardware.inc"
 
-def SCREEN_WIDTH  equ 160 ; In pixels
-def SCREEN_HEIGHT equ 144
-
 MACRO DisableLCD
         ; Turn the LCD off
         ld a, 0
@@ -60,7 +57,7 @@ InitTileData:
 InitOAM:
         ; Clear OAM memory
         ld a, 0
-        ld b, SCREEN_WIDTH
+        ld b, SCRN_X
         ld hl, _OAMRAM
 .clear_oam
         ld [hli], a
@@ -88,13 +85,13 @@ Main:
 WaitNotVBlank:
         ;;  Wait until not in VBLANK
         ld a, [rLY]
-        cp SCREEN_HEIGHT
+        cp SCRN_Y
         jp nc, WaitNotVBlank
         ret
 
 WaitVBlank:
         ld a, [rLY]
-        cp SCREEN_HEIGHT
+        cp SCRN_Y
         jp c, WaitVBlank
         ret
 

@@ -1,5 +1,7 @@
 INCLUDE "hardware.inc"
 
+EXPORT Memcopy
+
 MACRO DisableLCD
         ; Turn the LCD off
         ld a, 0
@@ -55,35 +57,6 @@ InitTileData:
         call Memcopy
 
         ret
-
-DEF BRICKS_START EQU 33
-DEF BRICKS_PER_LINE EQU 6
-DEF MAX_BRICK_LINES EQU 5
-
-DEF BRICK_LEFT_TILE EQU $05
-DEF BRICK_RIGHT_TILE EQU $06
-InitLevel:
-        ld hl, _SCRN0 + BRICKS_START
-        ld c, MAX_BRICK_LINES + 1
-.draw
-        ld b, BRICKS_PER_LINE
-        dec c
-        jr nz, .draw_line
-        ret
-.draw_line
-        ;; Draw a single line of bricks. Each brick is
-        ;; made up of two tiles.
-        ld a, BRICK_LEFT_TILE
-        ld [hli], a
-        ld a, BRICK_RIGHT_TILE
-        ld [hli], a
-        dec b
-        jr nz, .draw_line
-.next_line
-        ;; Offset the RAM to jump to the next line.
-        ld de, 20
-        add hl, de
-        jr .draw
 
 Main:
         call WaitVBlank

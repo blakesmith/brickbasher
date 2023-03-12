@@ -25,13 +25,6 @@ InitOAM:
         ld [hli], a
         ld [hl], a
 
-        ;; Initialize game's OAM data
-        call InitGameObjects
-        ret
-
-InitGameObjects:
-        ld a, PLAYFIELD_X_MIDDLE
-        ld [paddle_oam_x], a
         ret
 
 CopyOAM:
@@ -48,6 +41,7 @@ paddle_oam_x: ds 1
 paddle_oam_tile: ds 1
 paddle_oam_flags: ds 1
 
+EXPORT ball_oam_y, ball_oam_x, ball_oam_tile, ball_oam_flags
 ball_oam_y: ds 1
 ball_oam_x: ds 1
 ball_oam_tile: ds 1

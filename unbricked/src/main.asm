@@ -34,6 +34,7 @@ Init:
         call InitOAM
         call CopyDMARoutine
         call InitLevel
+        call InitGameObjects
         EnableLCD
         InitDisplayRegisters
         jp Main
@@ -97,6 +98,24 @@ Memcopy:
         ld a, b
         or a, c
         jp nz, Memcopy
+        ret
+
+InitGameObjects:
+        ;; Setup sprite tiles
+        ld a, 0
+        ld [paddle_oam_tile], a
+        ld a, 1
+        ld [ball_oam_tile], a
+        
+        ;; Center the paddle to start
+        ld a, PLAYFIELD_X_MIDDLE
+        ld [paddle_oam_x], a
+
+        ;; Init initial ball position
+        ld a, PLAYFIELD_X_MIDDLE - 20
+        ld [ball_oam_x], a
+        ld a, PLAYFIELD_Y_MIDDLE
+        ld [ball_oam_y], a
         ret
 
 MoveBall:

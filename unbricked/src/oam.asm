@@ -39,5 +39,10 @@ paddle_oam_x: ds 1
 paddle_oam_tile: ds 1
 paddle_oam_flags: ds 1
 
-free: ds 4 * 39
+ball_oam_y: ds 1
+ball_oam_x: ds 1
+ball_oam_tile: ds 1
+ball_oam_flags: ds 1
+
+free: ds 4 * 35
         

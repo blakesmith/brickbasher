@@ -56,11 +56,17 @@ InitTileData:
         ld bc, PaddleEnd - Paddle
         call Memcopy
 
+        ld de, Ball
+        ld hl, $8010
+        ld bc, BallEnd - Ball
+        call Memcopy
+
         ret
 
 Main:
         call WaitVBlank
         call ReadInput
+        call MoveBall
         call MovePaddle
         call CopyOAM
         jp Main
@@ -90,6 +96,9 @@ Memcopy:
         ld a, b
         or a, c
         jp nz, Memcopy
+        ret
+
+MoveBall:
         ret
 
 MovePaddle:

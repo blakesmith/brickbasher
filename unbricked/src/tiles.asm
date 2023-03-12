@@ -2,6 +2,7 @@ SECTION "Tiles", ROM0
 
 EXPORT Tiles, TilesEnd
 EXPORT Tilemap, TilemapEnd
+EXPORT Ball, BallEnd
 EXPORT Paddle, PaddleEnd
         
 Tiles:
@@ -249,3 +250,14 @@ Paddle:
     dw `00000000
     dw `00000000
 PaddleEnd:
+
+Ball:
+        dw `00000000
+        dw `00333300
+        dw `03000030
+        dw `03000030
+        dw `03000030
+        dw `00333300
+        dw `00000000
+        dw `00000000
+BallEnd:

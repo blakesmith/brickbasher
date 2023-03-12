@@ -12,6 +12,7 @@ SECTION "Current Level", WRAM0
 
 wCurrentLevel: ds 1
 wCurrentLevelData: ds MAX_BRICK_LINES
+wCurrentBlock: ds 1
 
 SECTION "Level functions", ROM0
 
@@ -31,23 +32,54 @@ CopyCurrentLevel:
 DEF BRICK_LEFT_TILE EQU $05
 DEF BRICK_RIGHT_TILE EQU $06
 
+
 DrawLevel:
+        ;; Initialize current block counter
+        ld a, 0
+        ld [wCurrentBlock], a
+        ;; Brick drawing position
         ld hl, _SCRN0 + BRICKS_START
+        ;; Setup line counter
         ld c, MAX_BRICK_LINES + 1
 .draw
         ld b, BRICKS_PER_LINE
         dec c
-        jr nz, .draw_line
+        jr nz, .check_brick
         ret
-.draw_line
-        ;; Draw a single line of bricks. Each brick is
-        ;; made up of two tiles.
+.check_brick
+        ;; Load the current block from active level data
+        push hl
+        ld a, [wCurrentBlock]
+        ld hl, wCurrentLevelData
+        ld d, 0
+        ld e, a
+        add hl, de
+        ld a, [hl]
+        ld d, 1
+        cp d
+        pop hl
+        jr z, .draw_brick
+.skip_brick
+        ;; There's no brick in this spot, skip drawing it!
+        ld a, [wCurrentBlock]
+        inc a
+        ld [wCurrentBlock], a
+        inc hl
+        inc hl
+        dec b
+        jr nz, .check_brick
+        jr z, .next_line
+.draw_brick
+        ;; There is a brick to draw in this spot, draw the correct tiles
+        ld a, [wCurrentBlock]
+        inc a
+        ld [wCurrentBlock], a
         ld a, BRICK_LEFT_TILE
         ld [hli], a
         ld a, BRICK_RIGHT_TILE
         ld [hli], a
         dec b
-        jr nz, .draw_line
+        jr nz, .check_brick
 .next_line
         ;; Offset the RAM to jump to the next line.
         ld de, 20
@@ -57,9 +89,9 @@ DrawLevel:
 SECTION "Levels", ROM0
 
 Level0:
-        dw %01010100
-        dw %10101000
-        dw %01010100
-        dw %10101000
-        dw %01010100
+        db 1,0,1,0,1,0
+        db 0,1,0,1,0,1
+        db 1,0,1,0,1,0
+        db 0,1,0,1,0,1
+        db 1,0,1,0,1,0
 Level0End:

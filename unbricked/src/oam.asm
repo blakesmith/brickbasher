@@ -2,6 +2,7 @@ EXPORT paddle_sprites
 EXPORT InitOAM, CopyOAM
 
 INCLUDE "hardware.inc"
+INCLUDE "constants.inc"
 
 SECTION "OAM Functions", ROM0
 InitOAM:
@@ -23,6 +24,14 @@ InitOAM:
         ld a, 0
         ld [hli], a
         ld [hl], a
+
+        ;; Initialize game's OAM data
+        call InitGameObjects
+        ret
+
+InitGameObjects:
+        ld a, PLAYFIELD_X_MIDDLE
+        ld [paddle_oam_x], a
         ret
 
 CopyOAM:

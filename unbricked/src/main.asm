@@ -1,4 +1,5 @@
 INCLUDE "hardware.inc"
+INCLUDE "constants.inc"
 
 EXPORT Memcopy
 
@@ -111,7 +112,7 @@ MovePaddle:
         ld a, [paddle_oam_x]
         dec a
         ;;  If we're already at the end of the playfield, don't move
-        cp a, 15
+        cp a, PLAYFIELD_X_START
         ret z
         ld [paddle_oam_x], a
         ret
@@ -126,7 +127,7 @@ MovePaddle:
         ld a, [paddle_oam_x]
         inc a
         ;;  If we're already at the end of the playfield, don't move
-        cp a, 105
+        cp a, PLAYFIELD_X_END
         ret z
         ld [paddle_oam_x], a
         ret

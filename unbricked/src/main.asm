@@ -112,7 +112,7 @@ InitGameObjects:
         ld [paddle_oam_x], a
 
         ;; Init initial ball position
-        ld a, PLAYFIELD_X_MIDDLE - 20
+        ld a, PLAYFIELD_X_MIDDLE
         ld [ball_oam_x], a
         ld a, PLAYFIELD_Y_MIDDLE
         ld [ball_oam_y], a

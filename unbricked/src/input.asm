@@ -1,6 +1,6 @@
 EXPORT wCurKeys, wNewKeys, ReadInput        
 
-INCLUDE "hardware.inc"
+INCLUDE "include/hardware.inc"
         
 SECTION "Input Variables", WRAM0
 wCurKeys: db

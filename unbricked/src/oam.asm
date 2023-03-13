@@ -1,8 +1,8 @@
 EXPORT paddle_sprites
 EXPORT InitOAM, CopyOAM
 
-INCLUDE "hardware.inc"
-INCLUDE "constants.inc"
+INCLUDE "include/hardware.inc"
+INCLUDE "include/constants.inc"
 
 SECTION "OAM Functions", ROM0
 InitOAM:

@@ -23,6 +23,22 @@ MACRO InitDisplayRegisters
         ld [rOBP0], a
 ENDM
 
+SECTION "Timer overflow interrupt", ROM0[$0050]
+    nop
+    jp isr_wrapper
+
+isr_wrapper:
+    push af
+    push hl
+    push bc
+    push de
+    call hUGE_dosound
+    pop de
+    pop bc
+    pop hl
+    pop af
+    reti
+
 SECTION "Header", ROM0[$100]
         jp Init
         ds $150 - @, 0          ; Make room for the header
@@ -35,6 +51,7 @@ Init:
         call CopyDMARoutine
         call InitLevel
         call InitGameObjects
+        call InitAudio
         EnableLCD
         InitDisplayRegisters
         jp Main
@@ -98,6 +115,20 @@ Memcopy:
         ld a, b
         or a, c
         jp nz, Memcopy
+        ret
+
+InitAudio:
+        ;; Turn audio on
+        ld a, $80
+        ld [rAUDENA], a
+        ld a, $FF
+        ld [rAUDTERM], a
+        ld a, $77
+        ld [rAUDVOL], a
+
+        ;; Start playing audio track
+        ld hl, first_track
+        call hUGE_init
         ret
 
 InitGameObjects:

@@ -7,7 +7,7 @@ in
 pkgs.mkShell {
   buildInputs = [
     pkgs.rgbds
-    pkgs.sameboy
+    pkgs.vbam
     hugetracker
   ];
 }

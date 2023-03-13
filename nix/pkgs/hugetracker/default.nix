@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
     sha256 = "sha256-LLe6NinFx1Gk1C3SttSw9l1JVH8c5duqmNjF8B+WXBE=";
   };
 
-  nativeBuildInputs = [ fpc lazarus ];
+  nativeBuildInputs = [ fpc lazarus rgbds ];
 
   buildInputs = [ atk cairo gdk-pixbuf glib gtk2 xorg.libX11 pango SDL2 fontconfig ];
 
@@ -28,10 +28,18 @@ stdenv.mkDerivation rec {
       src/rackctls/RackCtlsPkg.lpk \
       src/bgrabitmap/bgrabitmap/bgrabitmappack.lpk \
       src/hUGETracker.lpi
+    rgbasm -E -i src/hUGEDriver -o hUGEDriver.obj src/hUGEDriver/hUGEDriver.asm
+    rgbasm -i src/hUGEDriver/include -o halt.obj src/halt.asm
+    rgblink -o halt.gb -n halt.sym halt.obj hUGEDriver.obj
+    rgbfix -vp0xFF halt.gb
   '';
 
   installPhase = ''
     install -Dt $out/bin src/Release/hUGETracker
+    install -m 0644 -Dt $out/bin fonts/PixeliteTTF.ttf
+    install -m 0644 -Dt $out/bin halt.gb
+    install -m 0644 -Dt $out/bin halt.sym
+    cp -rv src/hUGEDriver $out/bin/hUGEDriver
   '';
 
   meta = with lib; {

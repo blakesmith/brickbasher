@@ -39,6 +39,24 @@ isr_wrapper:
     pop af
     reti
 
+
+SECTION "Working Variables", WRAM0
+
+DEF BALL_MOVE_LEFT  EQU 1 << 1
+DEF BALL_MOVE_RIGHT EQU 1 << 2
+DEF BALL_MOVE_UP    EQU 1 << 3
+DEF BALL_MOVE_DOWN  EQU 1 << 4
+
+;; Whether the ball is moving BALL_MOVE_LEFT, BALL_MOVE_RIGHT, BALL_MOVE_UP or BALL_MOVE_DOWN
+;; Note that a ball can be moving along the X axis (BALL_MOVE_LEFT, BALL_MOVE_RIGHT) and the
+;; Y axis (BALL_MOVE_UP, BALL_MOVE_DOWN) at the same time.
+wBallMoveState: ds 1
+
+;; If the ball is moving on the X axis, how many pixels velocity is it moving per frame?
+wBallVelocityX: ds 1
+;; If the ball is moving on the Y axis, how many pixels velocity is it moving per frame?
+wBallVelocityY: ds 1
+
 SECTION "Header", ROM0[$100]
         jp Init
         ds $150 - @, 0          ; Make room for the header
@@ -147,6 +165,14 @@ InitGameObjects:
         ld [ball_oam_x], a
         ld a, PLAYFIELD_Y_MIDDLE
         ld [ball_oam_y], a
+
+        ;; Initial ball state
+        ld a, BALL_MOVE_RIGHT & BALL_MOVE_DOWN
+        ld [wBallMoveState], a
+        ld a, 1
+        ld [wBallVelocityX], a
+        ld [wBallVelocityY], a
+
         ret
 
 MoveBall:

@@ -104,6 +104,7 @@ Main:
         call WaitVBlank
         call ReadInput
         call MoveBall
+        call BallWallCollisions
         call MovePaddle
         call CopyOAM
         jp Main
@@ -167,7 +168,7 @@ InitGameObjects:
         ld [ball_oam_y], a
 
         ;; Initial ball state
-        ld a, BALL_MOVE_RIGHT & BALL_MOVE_DOWN
+        ld a, BALL_MOVE_RIGHT | BALL_MOVE_DOWN
         ld [wBallMoveState], a
         ld a, 1
         ld [wBallVelocityX], a
@@ -176,7 +177,84 @@ InitGameObjects:
         ret
 
 MoveBall:
+.check_right
+        ld a, [wBallMoveState]
+        and a, BALL_MOVE_RIGHT
+        jr nz, .move_right
+.check_left
+        ld a, [wBallMoveState]
+        and a, BALL_MOVE_LEFT
+        jr nz, .move_left
+.check_up
+        ld a, [wBallMoveState]
+        and a, BALL_MOVE_UP
+        jr nz, .move_up
+.check_down
+        ld a, [wBallMoveState]
+        and a, BALL_MOVE_DOWN
+        jr nz, .move_down
+.done
         ret
+.move_right
+        ld hl, ball_oam_x
+        inc [hl]
+        jp .check_left
+.move_left
+        ld hl, ball_oam_x
+        dec [hl]
+        jp .check_up
+.move_up
+        ld hl, ball_oam_y
+        dec [hl]
+        jp .check_down
+.move_down
+        ld hl, ball_oam_y
+        inc [hl]
+        jp .done
+
+BallWallCollisions:
+.check_right
+        ld a, [ball_oam_x]
+        cp a, PLAYFIELD_X_END
+        jr z, .bounce_right
+.check_left
+        ld a, [ball_oam_x]
+        cp a, PLAYFIELD_X_START
+        jr z, .bounce_left
+.check_top
+        ld a, [ball_oam_y]
+        cp a, PLAYFIELD_Y_TOP
+        jr z, .bounce_top
+.check_bottom
+        ld a, [ball_oam_y]
+        cp a, PLAYFIELD_Y_BOTTOM
+        jr z, .bounce_bottom
+.done
+        ret
+.bounce_right
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_RIGHT
+        or a, BALL_MOVE_LEFT
+        ld [wBallMoveState], a
+        jp .check_left
+.bounce_left
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_LEFT
+        or a, BALL_MOVE_RIGHT
+        ld [wBallMoveState], a
+        jp .check_top
+.bounce_top
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_UP
+        or a, BALL_MOVE_DOWN
+        ld [wBallMoveState], a
+        jp .check_bottom
+.bounce_bottom
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_DOWN
+        or a, BALL_MOVE_UP
+        ld [wBallMoveState], a
+        jp .done
 
 MovePaddle:
 .check_left

@@ -29,8 +29,10 @@ CopyCurrentLevel:
         ld bc, Level0End - Level0
         call Memcopy
 
-DEF BRICK_LEFT_TILE EQU $05
-DEF BRICK_RIGHT_TILE EQU $06
+DEF WHITE_TILE EQU $00
+DEF BLACK_TILE EQU $01
+DEF BRICK_LEFT_TILE EQU $08
+DEF BRICK_RIGHT_TILE EQU $09
 
 
 DrawLevel:

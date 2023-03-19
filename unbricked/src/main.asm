@@ -47,6 +47,8 @@ DEF BALL_MOVE_RIGHT EQU 1 << 2
 DEF BALL_MOVE_UP    EQU 1 << 3
 DEF BALL_MOVE_DOWN  EQU 1 << 4
 
+wFrameTick: ds 1
+ 
 ;; Whether the ball is moving BALL_MOVE_LEFT, BALL_MOVE_RIGHT, BALL_MOVE_UP or BALL_MOVE_DOWN
 ;; Note that a ball can be moving along the X axis (BALL_MOVE_LEFT, BALL_MOVE_RIGHT) and the
 ;; Y axis (BALL_MOVE_UP, BALL_MOVE_DOWN) at the same time.
@@ -72,13 +74,17 @@ Init:
         call InitAudio
         EnableLCD
         InitDisplayRegisters
+
+        ;; Initialize frame tick
+        ld a, 0
+        ld [wFrameTick], a
         jp Main
 
 InitTileData:
         ; Copy tile data
-        ld de, Tiles
+        ld de, TileSheet
         ld hl, $9000
-        ld bc, TilesEnd - Tiles
+        ld bc, TileSheet_end - TileSheet
         call Memcopy
 
         ; Copy the tilemap
@@ -102,6 +108,7 @@ InitTileData:
 
 Main:
         call WaitVBlank
+        call TickFrame
         call ReadInput
         call MoveBall
         call BallWallCollisions
@@ -122,6 +129,11 @@ WaitVBlank:
         jp c, WaitVBlank
         ret
 
+TickFrame:
+        ld hl, wFrameTick
+        inc [hl]
+        ret
+        
 ; Copy bytes from one area to another.
 ; @param de: Source
 ; @param hl: Destination

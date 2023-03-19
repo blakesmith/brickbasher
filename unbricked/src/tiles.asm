@@ -26,17 +26,6 @@ Tilemap:
 TilemapEnd:
 
 
-Paddle:
-        dw `03333330
-        dw `32222223
-        dw `30000003
-        dw `03333330
-        dw `00000000
-        dw `00000000
-        dw `00000000
-        dw `00000000
-PaddleEnd:
-
 Ball:
         dw `00000000
         dw `00333300

@@ -1,4 +1,3 @@
-EXPORT paddle_sprites
 EXPORT InitOAM, CopyOAM
 
 INCLUDE "include/hardware.inc"
@@ -14,8 +13,7 @@ InitOAM:
         ld [hli], a
         dec b
         jp nz, .clear_oam
-        
-        ; Fill in OAM
+
         ld hl, wShadowOAM
         ld a, 128 + 16
         ld [hli], a
@@ -35,11 +33,23 @@ SECTION "OAM Vars", WRAM0[$C100],ALIGN[8]
 
 wShadowOAM:
 ;; Main paddle
-EXPORT paddle_oam_y, paddle_oam_x, paddle_oam_tile, paddle_oam_flags
-paddle_oam_y: ds 1
-paddle_oam_x: ds 1
-paddle_oam_tile: ds 1
-paddle_oam_flags: ds 1
+EXPORT paddle_1_oam_y, paddle_1_oam_x, paddle_1_oam_tile, paddle_1_oam_flags
+paddle_1_oam_y: ds 1
+paddle_1_oam_x: ds 1
+paddle_1_oam_tile: ds 1
+paddle_1_oam_flags: ds 1
+
+EXPORT paddle_2_oam_y, paddle_2_oam_x, paddle_2_oam_tile, paddle_2_oam_flags
+paddle_2_oam_y: ds 1
+paddle_2_oam_x: ds 1
+paddle_2_oam_tile: ds 1
+paddle_2_oam_flags: ds 1
+
+EXPORT paddle_3_oam_y, paddle_3_oam_x, paddle_3_oam_tile, paddle_3_oam_flags
+paddle_3_oam_y: ds 1
+paddle_3_oam_x: ds 1
+paddle_3_oam_tile: ds 1
+paddle_3_oam_flags: ds 1
 
 EXPORT ball_oam_y, ball_oam_x, ball_oam_tile, ball_oam_flags
 ball_oam_y: ds 1
@@ -47,5 +57,5 @@ ball_oam_x: ds 1
 ball_oam_tile: ds 1
 ball_oam_flags: ds 1
 
-free: ds 4 * 35
+free: ds 4 * 27
         

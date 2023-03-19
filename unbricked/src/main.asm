@@ -47,6 +47,9 @@ DEF BALL_MOVE_RIGHT EQU 1 << 2
 DEF BALL_MOVE_UP    EQU 1 << 3
 DEF BALL_MOVE_DOWN  EQU 1 << 4
 
+
+wPaddleX: ds 1
+
 wFrameTick: ds 1
  
 ;; Whether the ball is moving BALL_MOVE_LEFT, BALL_MOVE_RIGHT, BALL_MOVE_UP or BALL_MOVE_DOWN
@@ -96,11 +99,11 @@ InitTileData:
         ; Copy paddle tile data
         ld de, Paddle
         ld hl, $8000
-        ld bc, PaddleEnd - Paddle
+        ld bc, Paddle_end - Paddle
         call Memcopy
 
         ld de, Ball
-        ld hl, $8010
+        ld hl, $8030
         ld bc, BallEnd - Ball
         call Memcopy
 
@@ -113,6 +116,7 @@ Main:
         call MoveBall
         call BallWallCollisions
         call MovePaddle
+        call DrawObjects
         call CopyOAM
         jp Main
 
@@ -163,15 +167,37 @@ InitAudio:
         ret
 
 InitGameObjects:
-        ;; Setup sprite tiles
+        ;; Setup paddle sprites
         ld a, 0
-        ld [paddle_oam_tile], a
+        ld [paddle_1_oam_tile], a
         ld a, 1
+        ld [paddle_2_oam_tile], a
+        ld a, 2
+        ld [paddle_3_oam_tile], a
+
+        ld a, 128 + 16
+        ld [paddle_1_oam_y], a
+        ld [paddle_2_oam_y], a
+        ld [paddle_3_oam_y], a
+
+        ld a, 0
+        ld [paddle_1_oam_flags], a
+        ld [paddle_2_oam_flags], a
+        ld [paddle_3_oam_flags], a
+
+        ld [paddle_1_oam_x], a
+        ld [paddle_2_oam_x], a
+        ld [paddle_3_oam_x], a
+
+        ;; Setup ball sprite
+        ld a, 0
+        ld [ball_oam_flags], a
+        ld a, 3
         ld [ball_oam_tile], a
         
         ;; Center the paddle to start
         ld a, PLAYFIELD_X_MIDDLE
-        ld [paddle_oam_x], a
+        ld [wPaddleX], a
 
         ;; Init initial ball position
         ld a, PLAYFIELD_X_MIDDLE
@@ -275,12 +301,12 @@ MovePaddle:
         jr nz, .move_left
         jr z, .check_right
 .move_left
-        ld a, [paddle_oam_x]
+        ld a, [wPaddleX]
         dec a
         ;;  If we're already at the end of the playfield, don't move
         cp a, PLAYFIELD_X_START
         ret z
-        ld [paddle_oam_x], a
+        ld [wPaddleX], a
         ret
 
 .check_right
@@ -290,11 +316,19 @@ MovePaddle:
         ret z
 
 .move_right
-        ld a, [paddle_oam_x]
+        ld a, [wPaddleX]
         inc a
         ;;  If we're already at the end of the playfield, don't move
         cp a, PLAYFIELD_X_END
         ret z
-        ld [paddle_oam_x], a
+        ld [wPaddleX], a
         ret
 
+DrawObjects:
+        ld a, [wPaddleX]
+        ld [paddle_1_oam_x], a
+        add a, 8
+        ld [paddle_2_oam_x], a
+        add a, 8
+        ld [paddle_3_oam_x], a
+        ret

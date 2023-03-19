@@ -104,7 +104,7 @@ InitTileData:
 
         ld de, Ball
         ld hl, $8030
-        ld bc, BallEnd - Ball
+        ld bc, Ball_end - Ball
         call Memcopy
 
         ret

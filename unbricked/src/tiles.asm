@@ -26,13 +26,3 @@ Tilemap:
 TilemapEnd:
 
 
-Ball:
-        dw `00000000
-        dw `00333300
-        dw `03000030
-        dw `03000030
-        dw `03000030
-        dw `00333300
-        dw `00000000
-        dw `00000000
-BallEnd:

@@ -2,7 +2,7 @@ EXPORT Level0, Level0End
 EXPORT InitLevel
 EXPORT wCurrentLevel, wCurrentLevelData
 
-INCLUDE "include/hardware.inc"
+INCLUDE "src/include/hardware.inc"
 
 DEF BRICKS_START EQU 33
 DEF BRICKS_PER_LINE EQU 6

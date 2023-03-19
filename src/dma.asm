@@ -1,6 +1,6 @@
 EXPORT CopyDMARoutine, OAMDMA
 
-INCLUDE "include/hardware.inc"        
+INCLUDE "src/include/hardware.inc"        
 
 SECTION "OAM DMA routine", ROM0
 CopyDMARoutine:

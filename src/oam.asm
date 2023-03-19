@@ -1,7 +1,7 @@
 EXPORT InitOAM, CopyOAM
 
-INCLUDE "include/hardware.inc"
-INCLUDE "include/constants.inc"
+INCLUDE "src/include/hardware.inc"
+INCLUDE "src/include/constants.inc"
 
 SECTION "OAM Functions", ROM0
 InitOAM:

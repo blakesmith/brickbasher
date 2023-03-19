@@ -1,5 +1,5 @@
-include "include/hardware.inc"
-include "include/hUGE.inc"
+include "src/include/hardware.inc"
+include "src/include/hUGE.inc"
 
 MACRO add_a_to_r16
     add LOW(\1)
@@ -1876,4 +1876,4 @@ ENDC
     ret
 
 note_table:
-include "include/hUGE_note_table.inc"
+include "src/include/hUGE_note_table.inc"

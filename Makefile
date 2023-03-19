@@ -1,9 +1,9 @@
-ROM = unbricked.gb
+ROM = brickbasher.gb
 
 all: $(ROM)
 
 TILE_SHEETS=tiles/TileSheet.png.asm tiles/Paddle.png.asm tiles/Ball.png.asm
-ASM_FILES=main.asm input.asm tiles.asm dma.asm oam.asm levels.asm
+ASM_FILES=src/main.asm src/input.asm src/tiles.asm src/dma.asm src/oam.asm src/levels.asm
 SOUND_FILES=audio/hUGEDriver.asm audio/first_track.asm
 SOURCE_FILES:=$(ASM_FILES) $(SOUND_FILES) $(TILE_SHEETS)
 OBJECT_FILES=$(subst .asm,.o,$(SOURCE_FILES))
@@ -19,7 +19,7 @@ OBJECT_FILES=$(subst .asm,.o,$(SOURCE_FILES))
 	gbtile -t rgbds -i $< -o $@
 
 clean:
-	rm -f *.o
+	rm -f src/*.o
 	rm -f audio/*.o
 	rm -f tiles/*.asm
 	rm -f tiles/*.o

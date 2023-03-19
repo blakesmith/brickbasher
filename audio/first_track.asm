@@ -1,4 +1,4 @@
-include "include/hUGE.inc"
+include "src/include/hUGE.inc"
 
 SECTION "Song Data", ROMX
 

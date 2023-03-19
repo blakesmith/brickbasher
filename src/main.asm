@@ -1,5 +1,5 @@
-INCLUDE "include/hardware.inc"
-INCLUDE "include/constants.inc"
+INCLUDE "src/include/hardware.inc"
+INCLUDE "src/include/constants.inc"
 
 EXPORT Memcopy
 

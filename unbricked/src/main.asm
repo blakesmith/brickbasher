@@ -17,7 +17,7 @@ ENDM
 
 MACRO InitDisplayRegisters
         ; During the first (blank) frame, initialize the display registers
-        ld a, %1100100
+        ld a, %11011000
         ld [rBGP], a
         ld a, %11100100
         ld [rOBP0], a

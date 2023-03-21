@@ -115,6 +115,7 @@ Main:
         call ReadInput
         call MoveBall
         call BallWallCollisions
+        call BallPaddleCollisions
         call MovePaddle
         call DrawObjects
         call CopyOAM
@@ -175,7 +176,7 @@ InitGameObjects:
         ld a, 2
         ld [paddle_3_oam_tile], a
 
-        ld a, 128 + 16
+        ld a, PADDLE_Y
         ld [paddle_1_oam_y], a
         ld [paddle_2_oam_y], a
         ld [paddle_3_oam_y], a
@@ -293,6 +294,36 @@ BallWallCollisions:
         or a, BALL_MOVE_UP
         ld [wBallMoveState], a
         jp .done
+
+BallPaddleCollisions:
+        ;; Check y position, cheaper to return early on this one
+        ld a, [ball_oam_y]
+        cp a, PADDLE_Y - 4
+        ret nz
+
+        ;; Check ball x position is greater than the left side of the paddle
+        ;; Note that wPaddleX is the center point of the left most paddle sprite.
+        ld a, [wPaddleX]
+        sub a, 3 ; While the midpoint for a single sprite would be 4 pixels, the sprite stops one pixel before, so 3
+        ld b, a
+        ld a, [ball_oam_x]
+        cp a, b
+        ret c
+
+        ;; And check the ball x position is less than the right side of the paddle
+        ld a, [wPaddleX]
+        add a, 19 ; Since we're starting from the left most paddle sprite, add 16 (2 sprites), plus another 3 pixels to get to the end of the right most sprite
+        ld b, a
+        ld a, [ball_oam_x]
+        cp a, b
+        ret nc
+
+        ;; Collision: Bounce the ball
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_DOWN
+        or a, BALL_MOVE_UP
+        ld [wBallMoveState], a
+        ret
 
 MovePaddle:
 .check_left

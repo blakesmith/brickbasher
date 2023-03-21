@@ -15,7 +15,7 @@
         rec {
           packages.brick-basher = pkgs.callPackage ./default.nix { gbtile = gbtile.packages.${system}.gbtile; };
           defaultPackage = packages.brick-basher;
-          devShells.plain = import ./shell.nix;
+          devShells.plain = import ./shell.nix { gbtile = gbtile.packages.${system}.gbtile; };
         }
     );
 }

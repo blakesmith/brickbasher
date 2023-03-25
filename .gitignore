@@ -1,4 +1,5 @@
 *.o
 *.gb
 *.png.asm
+*.sym
 result

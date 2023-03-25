@@ -116,6 +116,7 @@ Main:
         call MoveBall
         call BallWallCollisions
         call BallPaddleCollisions
+        call BallBrickCollisions
         call MovePaddle
         call DrawObjects
         call CopyOAM
@@ -323,6 +324,26 @@ BallPaddleCollisions:
         xor a, BALL_MOVE_DOWN
         or a, BALL_MOVE_UP
         ld [wBallMoveState], a
+        ret
+
+BallBrickCollisions:
+        ld b, BRICKS_PER_LINE * MAX_BRICK_LINES
+.level_loop
+        dec b
+        ret z
+        ld hl, wCurrentLevelData
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld a, [hl]
+        ld d, 0
+        ;; Check if there's currently a brick at the current position
+        cp a, d
+        ;; There's no brick at the current position.
+        ;; Skip to the next brick.
+        jr z, .level_loop
+
+        ;; There's a brick at the current position, check for collisions!
         ret
 
 MovePaddle:

@@ -1,17 +1,16 @@
 EXPORT Level0, Level0End
 EXPORT InitLevel
-EXPORT wCurrentLevel, wCurrentLevelData
+EXPORT wCurrentLevel, wCurrentLevelData, wLevelTableX, wLevelTableY
 
 INCLUDE "src/include/hardware.inc"
-
-DEF BRICKS_START EQU 33
-DEF BRICKS_PER_LINE EQU 6
-DEF MAX_BRICK_LINES EQU 5
+INCLUDE "src/include/constants.inc"
 
 SECTION "Current Level", WRAM0
 
 wCurrentLevel: ds 1
-wCurrentLevelData: ds MAX_BRICK_LINES
+wCurrentLevelData: ds (MAX_BRICK_LINES * BRICKS_PER_LINE)
+wLevelTableX: ds (MAX_BRICK_LINES * BRICKS_PER_LINE)
+wLevelTableY: ds (MAX_BRICK_LINES * BRICKS_PER_LINE)
 wCurrentBlock: ds 1
 
 SECTION "Level functions", ROM0
@@ -28,6 +27,7 @@ CopyCurrentLevel:
         ld hl, wCurrentLevelData
         ld bc, Level0End - Level0
         call Memcopy
+        ret
 
 DEF WHITE_TILE EQU $00
 DEF BLACK_TILE EQU $01
@@ -36,6 +36,67 @@ DEF DARK_GRAY_TILE EQU $09
 DEF BRICK_LEFT_TILE EQU $0A
 DEF BRICK_RIGHT_TILE EQU $0B
 
+;; Calculates the top-left x,y coordinate of each
+;; brick, and fills it into lookup table memory at wLevelTableX,
+;; wLevelTableY, used for collision detection. Calculations are:
+;;
+;; brick_x = (PIXELS_PER_TILE * ((TILES_PER_BRICK * (b - 1)) + PADDING_TILE_LEFT))
+;; brick_y = ((PADDING_TILE_TOP + (c - 1)) * PIXELS_PER_TILE)
+;; 
+;; Inputs:
+;; b register = current brick count in line
+;; c regester = current line number.
+;;
+;; Should restore the b and c registers to their initial state
+;; before returning.
+PopulateBrickLookupTableCoordinates:
+        push hl
+
+        ;; Calculate x cordinate first
+        ;; brick_x = (PIXELS_PER_TILE * ((TILES_PER_BRICK * (b - 1)) + PADDING_TILE_LEFT))
+
+        ld a, b
+        dec a
+        ld h, c
+        push bc
+        ld c, h
+        ld de, TILES_PER_BRICK
+        ld a, 0
+        ;; ((TILES_PER_BRICK * (b - 1))
+        call mul8
+
+        ;; bc == output from above multiplication call.
+        ;; + PADDING_TILE_LEFT
+        ld a, LOW(bc)
+        add a, PADDING_TILE_LEFT
+        ld d, 0
+        ld e, a
+        ld c, PIXELS_PER_TILE
+        ld a, 0
+        ;; PIXELS_PER_TILE * tile count
+        call mul8
+
+        ;; x coordinate is now in bc. These results should only
+        ;; ever be 8 bit, so we should be able to safetly only
+        ;; take the low bits and put them in the lookup table
+        ld d, LOW(bc)
+
+        ;; Setup to write the x value out to our lookup table
+        ld a, [wCurrentBlock]
+
+        ;; Offset into the table
+        ld hl, wLevelTableX
+        ld b, 0
+        ld c, a
+        add hl, bc
+        ;; Write out the x value into the table
+        ld [hl], d
+
+        ;; Restore used registers
+        pop bc
+        pop hl
+        ret
+        
 DrawLevel:
         ;; Initialize current block counter
         ld a, 0
@@ -73,7 +134,11 @@ DrawLevel:
         jr nz, .check_brick
         jr z, .next_line
 .draw_brick
-        ;; There is a brick to draw in this spot, draw the correct tiles
+        ;; There is a brick to draw in this spot
+
+        call PopulateBrickLookupTableCoordinates
+
+        ;; draw the correct tiles
         ld a, [wCurrentBlock]
         inc a
         ld [wCurrentBlock], a

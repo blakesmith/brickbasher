@@ -41,7 +41,7 @@ DEF BRICK_RIGHT_TILE EQU $0B
 ;; wLevelTableY, used for collision detection. Calculations are:
 ;;
 ;; brick_x = (PIXELS_PER_TILE * ((TILES_PER_BRICK * (BRICKS_PER_LINE - b - 1)) + PADDING_TILE_LEFT))
-;; brick_y = ((PADDING_TILE_TOP + (c - 1)) * PIXELS_PER_TILE)
+;; brick_y = ((PADDING_TILE_TOP + (MAX_BRICK_LINES - c)) * PIXELS_PER_TILE)
 ;; 
 ;; Inputs:
 ;; b register = current brick count in line
@@ -58,12 +58,11 @@ PopulateBrickLookupTableCoordinates:
         ld d, b
         ld a, BRICKS_PER_LINE
         sub a, d
-        ld h, c
         push bc
         ld c, a
         ld de, TILES_PER_BRICK
         ld a, 0
-        ;; ((TILES_PER_BRICK * (BRICKS_PER_LINE - b - 1))
+        ;; tile_count = ((TILES_PER_BRICK * (BRICKS_PER_LINE - b - 1))
         call mul8
 
         ;; bc == output from above multiplication call.
@@ -74,7 +73,7 @@ PopulateBrickLookupTableCoordinates:
         ld e, a
         ld c, PIXELS_PER_TILE
         ld a, 0
-        ;; PIXELS_PER_TILE * tile count
+        ;; PIXELS_PER_TILE * tile_count
         call mul8
 
         ;; x coordinate is now in bc. These results should only
@@ -87,6 +86,41 @@ PopulateBrickLookupTableCoordinates:
 
         ;; Offset into the table
         ld hl, wLevelTableX
+        ld b, 0
+        ld c, a
+        add hl, bc
+        ;; Write out the x value into the table
+        ld [hl], d
+
+        ;; Calculate y coordinate next
+        ;; brick_y = ((PADDING_TILE_TOP + (MAX_BRICK_LINES - c)) * PIXELS_PER_TILE)
+        pop bc
+        ld a, c
+        push bc
+        ld c, a
+        ld a, MAX_BRICK_LINES
+        ;; (MAX_BRICK_LINES - c)
+        sub a, c
+        ;; row_count = (PADDING_TILE_TOP + (MAX_BRICK_LINES - c))
+        add a, PADDING_TILE_TOP
+
+        ld d, 0
+        ld e, a
+        ld c, PIXELS_PER_TILE
+        ld a, 0
+        ;; PIXELS_PER_TILE * row count
+        call mul8
+
+        ;; y coordinate is now in bc. These results should only
+        ;; ever be 8 bit, so we should be able to safetly only
+        ;; take the low bits and put them in the lookup table
+        ld d, LOW(bc)
+
+        ;; Setup to write the y value out to our lookup table
+        ld a, [wCurrentBlock]
+
+        ;; Offset into the table
+        ld hl, wLevelTableY
         ld b, 0
         ld c, a
         add hl, bc

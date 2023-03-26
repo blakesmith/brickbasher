@@ -48,8 +48,8 @@ DEF BALL_MOVE_UP    EQU 1 << 3
 DEF BALL_MOVE_DOWN  EQU 1 << 4
 
 
+wScore: ds 1
 wPaddleX: ds 1
-
 wFrameTick: ds 1
  
 ;; Whether the ball is moving BALL_MOVE_LEFT, BALL_MOVE_RIGHT, BALL_MOVE_UP or BALL_MOVE_DOWN
@@ -73,6 +73,7 @@ Init:
         call InitOAM
         call CopyDMARoutine
         call InitLevel
+        call InitScore
         call InitGameObjects
         call InitAudio
         EnableLCD
@@ -166,6 +167,11 @@ InitAudio:
         ;; Start playing audio track
         ld hl, first_track
         call hUGE_init
+        ret
+
+InitScore:
+        ld a, 0
+        ld [wScore], a
         ret
 
 InitGameObjects:
@@ -326,11 +332,28 @@ BallPaddleCollisions:
         ld [wBallMoveState], a
         ret
 
+;; Once collision has happened, remove the brick from the level
+;; Inputs: b register - The current index of the brick into the level that's been collided with
+BrickCollide:
+        ;; Bump the score
+        ld a, [wScore]
+        inc a
+        ld [wScore], a
+
+        ;; Change the ball direction. Down
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_UP
+        or a, BALL_MOVE_DOWN
+        ld [wBallMoveState], a
+
+        ret
+
 BallBrickCollisions:
-        ld b, BRICKS_PER_LINE * MAX_BRICK_LINES
+        ld b, (BRICKS_PER_LINE * MAX_BRICK_LINES)
 .level_loop
         dec b
         ret z
+
         ld hl, wCurrentLevelData
         ld d, 0
         ld e, b
@@ -344,7 +367,48 @@ BallBrickCollisions:
         jr z, .level_loop
 
         ;; There's a brick at the current position, check for collisions!
-        ret
+        ;; 
+        ;; Lookup the X coordinate of the top-left corner of the brick
+        ld hl, wLevelTableX
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld a, [hl]
+        ld c, a
+
+        ;; Compare the x position of the ball against the current brick
+        ;; Make sure the ball is between the x coordinates of the brick
+        ld a, [ball_oam_x]
+        cp a, c
+        ;; if (c < a) { continue; }
+        jr nc, .level_loop
+
+        add a, PIXELS_PER_TILE * TILES_PER_BRICK
+        cp a, c
+        ;; if (c > a) { continue; }
+        jr c, .level_loop
+
+        ;; Lookup the Y coordinate of the top-left corner of the brick
+        ld hl, wLevelTableY
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld c, a
+
+        ld a, [ball_oam_y]
+        cp a, c
+        ;; if (c < a) { continue; }
+        jr nc, .level_loop
+
+        add a, PIXELS_PER_TILE
+        cp a, c
+        ;; if (c > a) { continue; }
+        jr c, .level_loop
+
+        ;; Collision with a brick happened at this point.
+        call BrickCollide
+
+        jp .level_loop
 
 MovePaddle:
 .check_left

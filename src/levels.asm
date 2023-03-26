@@ -40,7 +40,7 @@ DEF BRICK_RIGHT_TILE EQU $0B
 ;; brick, and fills it into lookup table memory at wLevelTableX,
 ;; wLevelTableY, used for collision detection. Calculations are:
 ;;
-;; brick_x = (PIXELS_PER_TILE * ((TILES_PER_BRICK * (b - 1)) + PADDING_TILE_LEFT))
+;; brick_x = (PIXELS_PER_TILE * ((TILES_PER_BRICK * (BRICKS_PER_LINE - b - 1)) + PADDING_TILE_LEFT))
 ;; brick_y = ((PADDING_TILE_TOP + (c - 1)) * PIXELS_PER_TILE)
 ;; 
 ;; Inputs:
@@ -53,16 +53,17 @@ PopulateBrickLookupTableCoordinates:
         push hl
 
         ;; Calculate x cordinate first
-        ;; brick_x = (PIXELS_PER_TILE * ((TILES_PER_BRICK * (b - 1)) + PADDING_TILE_LEFT))
+        ;; brick_x = (PIXELS_PER_TILE * ((TILES_PER_BRICK * (BRICKS_PER_LINE - b - 1)) + PADDING_TILE_LEFT))
 
-        ld a, b
-        dec a
+        ld d, b
+        ld a, BRICKS_PER_LINE
+        sub a, d
         ld h, c
         push bc
-        ld c, h
+        ld c, a
         ld de, TILES_PER_BRICK
         ld a, 0
-        ;; ((TILES_PER_BRICK * (b - 1))
+        ;; ((TILES_PER_BRICK * (BRICKS_PER_LINE - b - 1))
         call mul8
 
         ;; bc == output from above multiplication call.

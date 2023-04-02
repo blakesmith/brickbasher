@@ -350,7 +350,7 @@ DamageBrick:
 
         ld d, 1
         cp a, d
-        jr z, .brick_hurt
+        jr z, .brick_damaged
 
 .update_tile
         ;; Adjust the brick tile in the tilemap to reflect
@@ -364,19 +364,23 @@ DamageBrick:
         ld e, a
         ld hl, _SCRN0 + BRICKS_START
         add hl, de
-        pop af
+        pop de
+        ld a, d
         ld [hli], a
+        ld a, e
         ld [hl], a
 
         ret
 
 .brick_destroyed
-        ld a, WHITE_TILE
-        push af
+        ld d, WHITE_TILE
+        ld e, WHITE_TILE
+        push de
         jp .update_tile
-.brick_hurt
-        ld a, BLACK_TILE
-        push af
+.brick_damaged
+        ld d, BRICK_LEFT_DAMAGED
+        ld e, BRICK_RIGHT_DAMAGED
+        push de
         jp .update_tile
 
 ;; Once collision has happened, remove the brick from the level

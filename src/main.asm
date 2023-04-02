@@ -334,15 +334,27 @@ BallPaddleCollisions:
 
 
 ;; Inputs: b register - The current index of the brick into the level that's been collided with
-DestroyBrick:
-        ;; Remove the brick from the level data
+DamageBrick:
+        ;; Decrement the 'health' of the brick by one
         ld hl, wCurrentLevelData
         ld d, 0
         ld e, b
         add hl, de
-        ld [hl], 0
+        ld a, [hl]
+        dec a
+        ld [hl], a
 
-        ;; Remove the brick tile from the tilemap
+        ld d, 0
+        cp a, d
+        jr z, .brick_destroyed
+
+        ld d, 1
+        cp a, d
+        jr z, .brick_hurt
+
+.update_tile
+        ;; Adjust the brick tile in the tilemap to reflect
+        ;; the current health.
         ld hl, LevelTileTable
         ld d, 0
         ld e, b
@@ -352,11 +364,20 @@ DestroyBrick:
         ld e, a
         ld hl, _SCRN0 + BRICKS_START
         add hl, de
-        ld a, WHITE_TILE
+        pop af
         ld [hli], a
         ld [hl], a
 
         ret
+
+.brick_destroyed
+        ld a, WHITE_TILE
+        push af
+        jp .update_tile
+.brick_hurt
+        ld a, BLACK_TILE
+        push af
+        jp .update_tile
 
 ;; Once collision has happened, remove the brick from the level
 ;; Inputs: b register - The current index of the brick into the level that's been collided with
@@ -367,7 +388,7 @@ BrickCollide:
         ld [wScore], a
 
         ;; Remove the tile from the current level
-        call DestroyBrick
+        call DamageBrick
 
         ld hl, wLevelTableY
         ld d, 0

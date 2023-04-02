@@ -149,10 +149,10 @@ DrawLevel:
         ld e, a
         add hl, de
         ld a, [hl]
-        ld d, 1
-        cp d
+        ld d, 0
+        cp a, d
         pop hl
-        jr z, .draw_brick
+        jp nz, .draw_brick
 .skip_brick
         ;; There's no brick in this spot, skip drawing it!
         ld a, [wCurrentBlock]
@@ -205,15 +205,15 @@ SECTION "Levels", ROM0
 ;;         db 0,0,0,0,0,0
 ;;         db 0,0,0,0,0,0
 ;;         db 0,0,0,0,0,0
-;;         db 0,0,1,0,0,0
+;;         db 0,0,2,0,0,0
 ;; Level0End:
 
 Level0:
-        db 1,0,1,0,1,0
-        db 0,1,0,1,0,1
-        db 1,0,1,0,1,0
-        db 0,1,0,1,0,1
-        db 1,0,1,0,1,0
+        db 2,0,2,0,2,0
+        db 0,2,0,2,0,2
+        db 2,0,2,0,2,0
+        db 0,2,0,2,0,2
+        db 2,0,2,0,2,0
 Level0End:
 
 ;; Level0:

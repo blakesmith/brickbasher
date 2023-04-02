@@ -349,10 +349,12 @@ BrickCollide:
         ret
 
 BallBrickCollisions:
-        ld b, (BRICKS_PER_LINE * MAX_BRICK_LINES)
+        ld b, 0
 .level_loop
-        dec b
-        ret z
+        inc b
+        ld a, b
+        cp a, (BRICKS_PER_LINE * MAX_BRICK_LINES) - 1
+        ret nc
 
         ld hl, wCurrentLevelData
         ld d, 0
@@ -378,37 +380,41 @@ BallBrickCollisions:
 
         ;; Compare the x position of the ball against the current brick
         ;; Make sure the ball is between the x coordinates of the brick
+        ;; if (ball_x > table_x && ball_x < (table_x + 16)) { goto check_y; }
         ld a, [ball_oam_x]
         cp a, c
-        ;; if (c < a) { continue; }
-        jr nc, .level_loop
-
-        add a, PIXELS_PER_TILE * TILES_PER_BRICK
-        cp a, c
-        ;; if (c > a) { continue; }
         jr c, .level_loop
+
+        ld a, c
+        add a, PIXELS_PER_TILE * TILES_PER_BRICK
+        ld c, a
+        ld a, [ball_oam_x]
+        cp a, c
+        jr nc, .level_loop
 
         ;; Lookup the Y coordinate of the top-left corner of the brick
         ld hl, wLevelTableY
         ld d, 0
         ld e, b
         add hl, de
+        ld a, [hl]
         ld c, a
 
         ld a, [ball_oam_y]
         cp a, c
-        ;; if (c < a) { continue; }
-        jr nc, .level_loop
-
-        add a, PIXELS_PER_TILE
-        cp a, c
-        ;; if (c > a) { continue; }
         jr c, .level_loop
+
+        ld a, c
+        add a, PIXELS_PER_TILE
+        ld c, a
+        ld a, [ball_oam_y]
+        cp a, c
+        jr nc, .level_loop
 
         ;; Collision with a brick happened at this point.
         call BrickCollide
 
-        jp .level_loop
+        ret
 
 MovePaddle:
 .check_left
@@ -434,8 +440,8 @@ MovePaddle:
 .move_right
         ld a, [wPaddleX]
         inc a
-        ;;  If we're already at the end of the playfield, don't move
-        cp a, PLAYFIELD_X_END
+        ;;  If we're already at the end of the playfield (offset by paddle width), don't move
+        cp a, PLAYFIELD_X_END - 18
         ret z
         ld [wPaddleX], a
         ret

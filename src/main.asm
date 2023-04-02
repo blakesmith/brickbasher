@@ -23,6 +23,30 @@ MACRO InitDisplayRegisters
         ld [rOBP0], a
 ENDM
 
+MACRO BounceBallLeft
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_RIGHT
+        ld [wBallMoveState], a
+ENDM
+
+MACRO BounceBallRight
+        ld a, [wBallMoveState]
+        or a, BALL_MOVE_RIGHT
+        ld [wBallMoveState], a
+ENDM
+
+MACRO BounceBallDown
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_UP
+        ld [wBallMoveState], a
+ENDM
+
+MACRO BounceBallUp
+        ld a, [wBallMoveState]
+        or a, BALL_MOVE_UP
+        ld [wBallMoveState], a
+ENDM
+
 SECTION "Timer overflow interrupt", ROM0[$0050]
     nop
     jp isr_wrapper
@@ -42,11 +66,8 @@ isr_wrapper:
 
 SECTION "Working Variables", WRAM0
 
-DEF BALL_MOVE_LEFT  EQU 1 << 1
-DEF BALL_MOVE_RIGHT EQU 1 << 2
-DEF BALL_MOVE_UP    EQU 1 << 3
-DEF BALL_MOVE_DOWN  EQU 1 << 4
-
+DEF BALL_MOVE_RIGHT EQU 1 << 1
+DEF BALL_MOVE_UP    EQU 1 << 2
 
 wScore: ds 1
 wPaddleX: ds 1
@@ -214,7 +235,7 @@ InitGameObjects:
         ld [ball_oam_y], a
 
         ;; Initial ball state
-        ld a, BALL_MOVE_RIGHT | BALL_MOVE_DOWN
+        ld a, BALL_MOVE_RIGHT
         ld [wBallMoveState], a
         ld a, 1
         ld [wBallVelocityX], a
@@ -242,18 +263,12 @@ MoveBall:
         ld a, [wBallMoveState]
         and a, BALL_MOVE_RIGHT
         jr nz, .move_right
-.check_left
-        ld a, [wBallMoveState]
-        and a, BALL_MOVE_LEFT
-        jr nz, .move_left
+        jr z, .move_left
 .check_up
         ld a, [wBallMoveState]
         and a, BALL_MOVE_UP
         jr nz, .move_up
-.check_down
-        ld a, [wBallMoveState]
-        and a, BALL_MOVE_DOWN
-        jr nz, .move_down
+        jr z, .move_down
 .done
         ret
 .move_right
@@ -262,7 +277,7 @@ MoveBall:
         ld a, [ball_oam_x]
         add a, b
         ld [ball_oam_x], a
-        jp .check_left
+        jp .check_up
 .move_left
         ld a, [wBallVelocityX]
         ld b, a
@@ -276,7 +291,7 @@ MoveBall:
         ld a, [ball_oam_y]
         sub a, b
         ld [ball_oam_y], a
-        jp .check_down
+        jp .done
 .move_down
         ld a, [wBallVelocityY]
         ld b, a
@@ -289,44 +304,33 @@ BallWallCollisions:
 .check_right
         ld a, [ball_oam_x]
         cp a, PLAYFIELD_X_END
-        jr z, .bounce_right
+        jr z, .bounce_left
 .check_left
         ld a, [ball_oam_x]
         cp a, PLAYFIELD_X_START
-        jr z, .bounce_left
+        jr z, .bounce_right
 .check_top
         ld a, [ball_oam_y]
         cp a, PLAYFIELD_Y_TOP
-        jr z, .bounce_top
+        jr z, .bounce_bottom
 .check_bottom
         ld a, [ball_oam_y]
         cp a, PLAYFIELD_Y_BOTTOM
-        jr z, .bounce_bottom
+        jr z, .bounce_top
 .done
         ret
-.bounce_right
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_RIGHT
-        or a, BALL_MOVE_LEFT
-        ld [wBallMoveState], a
-        jp .check_left
+
 .bounce_left
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_LEFT
-        or a, BALL_MOVE_RIGHT
-        ld [wBallMoveState], a
+        BounceBallLeft
+        jp .check_left
+.bounce_right
+        BounceBallRight
         jp .check_top
-.bounce_top
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_UP
-        or a, BALL_MOVE_DOWN
-        ld [wBallMoveState], a
-        jp .check_bottom
 .bounce_bottom
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_DOWN
-        or a, BALL_MOVE_UP
-        ld [wBallMoveState], a
+        BounceBallDown
+        jp .check_bottom
+.bounce_top
+        BounceBallUp
         jp .done
 
 BallPaddleCollisions:
@@ -353,10 +357,7 @@ BallPaddleCollisions:
         ret nc
 
         ;; Collision: Bounce the ball
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_DOWN
-        or a, BALL_MOVE_UP
-        ld [wBallMoveState], a
+        BounceBallUp
 
         call ToggleBallXVelocity
 
@@ -475,32 +476,20 @@ BrickCollide:
 
 .bounce_down
         ;; Change the ball direction. Down
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_UP
-        or a, BALL_MOVE_DOWN
-        ld [wBallMoveState], a
+        BounceBallDown
         ret
 
 .bounce_up
         ;; Change the ball direction. Up
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_DOWN
-        or a, BALL_MOVE_UP
-        ld [wBallMoveState], a
+        BounceBallUp
         ret
 
 .bounce_left
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_RIGHT
-        or a, BALL_MOVE_LEFT
-        ld [wBallMoveState], a
+        BounceBallLeft
         ret
 
 .bounce_right
-        ld a, [wBallMoveState]
-        xor a, BALL_MOVE_LEFT
-        or a, BALL_MOVE_RIGHT
-        ld [wBallMoveState], a
+        BounceBallRight
         ret
 
 BallBrickCollisions:

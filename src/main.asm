@@ -340,6 +340,19 @@ BrickCollide:
         inc a
         ld [wScore], a
 
+        ld hl, wLevelTableX
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld a, [hl]
+        ld c, a
+
+        ld hl, wLevelTableY
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld d, [hl]
+
         ;; Change the ball direction. Down
         ld a, [wBallMoveState]
         xor a, BALL_MOVE_UP
@@ -386,7 +399,7 @@ BallBrickCollisions:
         jr c, .level_loop
 
         ld a, c
-        add a, PIXELS_PER_TILE * TILES_PER_BRICK
+        add a, (PIXELS_PER_TILE * TILES_PER_BRICK) + (PIXELS_PER_TILE / 4)
         ld c, a
         ld a, [ball_oam_x]
         cp a, c
@@ -405,7 +418,7 @@ BallBrickCollisions:
         jr c, .level_loop
 
         ld a, c
-        add a, PIXELS_PER_TILE
+        add a, (PIXELS_PER_TILE - (PIXELS_PER_TILE / 4))
         ld c, a
         ld a, [ball_oam_y]
         cp a, c

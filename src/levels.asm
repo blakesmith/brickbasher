@@ -1,4 +1,6 @@
 EXPORT Level0, Level0End
+
+EXPORT LevelTileTable, LevelTileTableEnd
 EXPORT InitLevel
 EXPORT wCurrentLevel, wCurrentLevelData, wLevelTableX, wLevelTableY
 
@@ -28,13 +30,6 @@ CopyCurrentLevel:
         ld bc, Level0End - Level0
         call Memcopy
         ret
-
-DEF WHITE_TILE EQU $00
-DEF BLACK_TILE EQU $01
-DEF LIGHT_GRAY_TILE EQU $08
-DEF DARK_GRAY_TILE EQU $09
-DEF BRICK_LEFT_TILE EQU $0A
-DEF BRICK_RIGHT_TILE EQU $0B
 
 ;; Calculates the top-left x,y coordinate of each
 ;; brick, and fills it into lookup table memory at wLevelTableX,
@@ -188,6 +183,20 @@ DrawLevel:
         ld de, 20
         add hl, de
         jr .draw
+
+
+SECTION "LevelTileTable", ROM0
+
+;; This maps from a brick index, to its tile position added to the screen offset.
+;; This is used so we can quickly remove a brick from the tilemap when it needs to
+;; be destroyed.
+LevelTileTable:
+        db 0, 2, 4, 6, 8, 10
+        db 32, 34, 36, 38, 40, 42
+        db 64, 66, 68, 70, 72, 74
+        db 96, 98, 100, 102, 104, 106
+        db 128, 130, 132, 134, 136, 138
+LevelTileTableEnd:
         
 SECTION "Levels", ROM0
 
@@ -206,3 +215,11 @@ Level0:
         db 0,1,0,1,0,1
         db 1,0,1,0,1,0
 Level0End:
+
+;; Level0:
+;;         db 1,1,1,1,1,1
+;;         db 1,1,1,1,1,1
+;;         db 1,1,1,1,1,1
+;;         db 1,1,1,1,1,1
+;;         db 1,1,1,1,1,1
+;; Level0End:

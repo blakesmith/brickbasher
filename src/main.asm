@@ -332,6 +332,32 @@ BallPaddleCollisions:
         ld [wBallMoveState], a
         ret
 
+
+;; Inputs: b register - The current index of the brick into the level that's been collided with
+DestroyBrick:
+        ;; Remove the brick from the level data
+        ld hl, wCurrentLevelData
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld [hl], 0
+
+        ;; Remove the brick tile from the tilemap
+        ld hl, LevelTileTable
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld a, [hl]
+        ld d, 0
+        ld e, a
+        ld hl, _SCRN0 + BRICKS_START
+        add hl, de
+        ld a, WHITE_TILE
+        ld [hli], a
+        ld [hl], a
+
+        ret
+
 ;; Once collision has happened, remove the brick from the level
 ;; Inputs: b register - The current index of the brick into the level that's been collided with
 BrickCollide:
@@ -339,6 +365,9 @@ BrickCollide:
         ld a, [wScore]
         inc a
         ld [wScore], a
+
+        ;; Remove the tile from the current level
+        call DestroyBrick
 
         ld hl, wLevelTableY
         ld d, 0
@@ -420,9 +449,8 @@ BrickCollide:
 BallBrickCollisions:
         ld b, 0
 .level_loop
-        inc b
         ld a, b
-        cp a, (BRICKS_PER_LINE * MAX_BRICK_LINES) - 1
+        cp a, (BRICKS_PER_LINE * MAX_BRICK_LINES)
         ret nc
 
         ld hl, wCurrentLevelData
@@ -435,7 +463,7 @@ BallBrickCollisions:
         cp a, d
         ;; There's no brick at the current position.
         ;; Skip to the next brick.
-        jr z, .level_loop
+        jr z, .next
 
         ;; There's a brick at the current position, check for collisions!
         ;; 
@@ -454,14 +482,14 @@ BallBrickCollisions:
         ld c, a
         ld a, [ball_oam_x]
         cp a, c
-        jr c, .level_loop
+        jr c, .next
 
         ld a, c
         add a, (PIXELS_PER_TILE * TILES_PER_BRICK) + (PIXELS_PER_TILE / 4) + 2
         ld c, a
         ld a, [ball_oam_x]
         cp a, c
-        jr nc, .level_loop
+        jr nc, .next
 
         ;; Lookup the Y coordinate of the top-left corner of the brick
         ld hl, wLevelTableY
@@ -475,19 +503,22 @@ BallBrickCollisions:
         ld c, a
         ld a, [ball_oam_y]
         cp a, c
-        jr c, .level_loop
+        jr c, .next
 
         ld a, d
         add a, (PIXELS_PER_TILE - (PIXELS_PER_TILE / 4))
         ld c, a
         ld a, [ball_oam_y]
         cp a, c
-        jr nc, .level_loop
+        jr nc, .next
 
         ;; Collision with a brick happened at this point.
         call BrickCollide
 
         ret
+.next
+        inc b
+        jp .level_loop
 
 MovePaddle:
 .check_left

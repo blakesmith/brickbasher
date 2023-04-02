@@ -222,6 +222,21 @@ InitGameObjects:
 
         ret
 
+ToggleBallXVelocity:
+        ld a, [wBallVelocityX]
+        ld b, 2
+        cp a, b
+        jr z, .decrease_velocity
+        jr nz, .increase_velocity
+.decrease_velocity
+        ld a, 1
+        ld [wBallVelocityX], a
+        ret
+.increase_velocity
+        ld a, 2
+        ld [wBallVelocityX], a
+        ret
+
 MoveBall:
 .check_right
         ld a, [wBallMoveState]
@@ -342,6 +357,9 @@ BallPaddleCollisions:
         xor a, BALL_MOVE_DOWN
         or a, BALL_MOVE_UP
         ld [wBallMoveState], a
+
+        call ToggleBallXVelocity
+
         ret
 
 

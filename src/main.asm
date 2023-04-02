@@ -344,10 +344,12 @@ DamageBrick:
         dec a
         ld [hl], a
 
+        ;; The brick has gotten to 0 health, destroy it.
         ld d, 0
         cp a, d
         jr z, .brick_destroyed
 
+        ;; The brick is damaged
         ld d, 1
         cp a, d
         jr z, .brick_damaged

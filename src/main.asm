@@ -340,25 +340,81 @@ BrickCollide:
         inc a
         ld [wScore], a
 
-        ld hl, wLevelTableX
-        ld d, 0
-        ld e, b
-        add hl, de
-        ld a, [hl]
-        ld c, a
-
         ld hl, wLevelTableY
         ld d, 0
         ld e, b
         add hl, de
-        ld d, [hl]
+        ld c, [hl]
 
+        ;; See if we hit the bottom bounding box
+        ld a, c
+        inc a
+        add a, (PIXELS_PER_TILE - (PIXELS_PER_TILE / 2))
+        ld d, a
+        ld a, [ball_oam_y]
+        cp a, d
+        jr z, .bounce_down
+
+        ;; See if we hit the top bounding box
+        ld a, c
+        sub a, (PIXELS_PER_TILE - (PIXELS_PER_TILE / 4))
+        ld d, a
+        ld a, [ball_oam_y]
+        cp a, d
+        jr z, .bounce_up
+
+        ld hl, wLevelTableX
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld c, [hl]
+
+        ;; See if we hit the left bounding box
+        ld a, c
+        add a, PIXELS_PER_TILE / 4
+        ld d, a
+        ld a, [ball_oam_x]
+        cp a, d
+        jr z, .bounce_left
+
+        ;; See if we hit the right bounding box
+        ld a, c
+        add a, (PIXELS_PER_TILE * TILES_PER_BRICK) + (PIXELS_PER_TILE / 4) + 2
+        ld d, a
+        ld a, [ball_oam_x]
+        cp a, d
+        jr z, .bounce_right
+
+        ret
+
+.bounce_down
         ;; Change the ball direction. Down
         ld a, [wBallMoveState]
         xor a, BALL_MOVE_UP
         or a, BALL_MOVE_DOWN
         ld [wBallMoveState], a
+        ret
 
+.bounce_up
+        ;; Change the ball direction. Up
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_DOWN
+        or a, BALL_MOVE_UP
+        ld [wBallMoveState], a
+        ret
+
+.bounce_left
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_RIGHT
+        or a, BALL_MOVE_LEFT
+        ld [wBallMoveState], a
+        ret
+
+.bounce_right
+        ld a, [wBallMoveState]
+        xor a, BALL_MOVE_LEFT
+        or a, BALL_MOVE_RIGHT
+        ld [wBallMoveState], a
         ret
 
 BallBrickCollisions:
@@ -388,18 +444,20 @@ BallBrickCollisions:
         ld d, 0
         ld e, b
         add hl, de
-        ld a, [hl]
-        ld c, a
+        ld c, [hl]
 
         ;; Compare the x position of the ball against the current brick
         ;; Make sure the ball is between the x coordinates of the brick
         ;; if (ball_x > table_x && ball_x < (table_x + 16)) { goto check_y; }
+        ld a, c
+        add a, (PIXELS_PER_TILE / 4)
+        ld c, a
         ld a, [ball_oam_x]
         cp a, c
         jr c, .level_loop
 
         ld a, c
-        add a, (PIXELS_PER_TILE * TILES_PER_BRICK) + (PIXELS_PER_TILE / 4)
+        add a, (PIXELS_PER_TILE * TILES_PER_BRICK) + (PIXELS_PER_TILE / 4) + 2
         ld c, a
         ld a, [ball_oam_x]
         cp a, c
@@ -410,14 +468,16 @@ BallBrickCollisions:
         ld d, 0
         ld e, b
         add hl, de
-        ld a, [hl]
-        ld c, a
+        ld d, [hl]
 
+        ld a, d
+        sub a, (PIXELS_PER_TILE - (PIXELS_PER_TILE / 4))
+        ld c, a
         ld a, [ball_oam_y]
         cp a, c
         jr c, .level_loop
 
-        ld a, c
+        ld a, d
         add a, (PIXELS_PER_TILE - (PIXELS_PER_TILE / 4))
         ld c, a
         ld a, [ball_oam_y]

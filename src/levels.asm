@@ -191,6 +191,14 @@ DrawLevel:
         
 SECTION "Levels", ROM0
 
+;; Level0:
+;;         db 0,0,0,0,0,0
+;;         db 0,0,0,0,0,0
+;;         db 0,0,0,0,0,0
+;;         db 0,0,0,0,0,0
+;;         db 0,0,1,0,0,0
+;; Level0End:
+
 Level0:
         db 1,0,1,0,1,0
         db 0,1,0,1,0,1

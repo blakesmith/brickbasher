@@ -242,20 +242,32 @@ MoveBall:
 .done
         ret
 .move_right
-        ld hl, ball_oam_x
-        inc [hl]
+        ld a, [wBallVelocityX]
+        ld b, a
+        ld a, [ball_oam_x]
+        add a, b
+        ld [ball_oam_x], a
         jp .check_left
 .move_left
-        ld hl, ball_oam_x
-        dec [hl]
+        ld a, [wBallVelocityX]
+        ld b, a
+        ld a, [ball_oam_x]
+        sub a, b
+        ld [ball_oam_x], a
         jp .check_up
 .move_up
-        ld hl, ball_oam_y
-        dec [hl]
+        ld a, [wBallVelocityY]
+        ld b, a
+        ld a, [ball_oam_y]
+        sub a, b
+        ld [ball_oam_y], a
         jp .check_down
 .move_down
-        ld hl, ball_oam_y
-        inc [hl]
+        ld a, [wBallVelocityY]
+        ld b, a
+        ld a, [ball_oam_y]
+        add a, b
+        ld [ball_oam_y], a
         jp .done
 
 BallWallCollisions:

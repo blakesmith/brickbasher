@@ -353,7 +353,7 @@ BallWallCollisions:
 .check_bottom
         ld a, [ball_oam_y]
         cp a, PLAYFIELD_Y_BOTTOM
-        jr z, .bounce_top
+        jp z, BallDead
 .done
         ret
 
@@ -366,8 +366,6 @@ BallWallCollisions:
 .bounce_bottom
         BounceBallDown
         jp .check_bottom
-.bounce_top
-        jp BallDead
 
 BallPaddleCollisions:
         ;; Check y position, cheaper to return early on this one

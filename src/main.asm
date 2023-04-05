@@ -1,7 +1,7 @@
 INCLUDE "src/include/hardware.inc"
 INCLUDE "src/include/constants.inc"
 
-EXPORT Memcopy
+EXPORT Memcopy, WinGame
 
 MACRO DisableLCD
         ; Turn the LCD off
@@ -93,6 +93,7 @@ Init:
         call InitTileData
         call InitOAM
         call CopyDMARoutine
+        call SetFirstLevel
         call InitLevel
         call InitLives
         call UpdateLives
@@ -196,7 +197,12 @@ InitLives:
         ld [wLives], a
         ret
 
+WinGame:
+        ;; TODO: Implement!
+        jp WinGame
+
 GameOver:
+        ;; TODO: Implement!
         jp GameOver
 
 InitGameObjects:
@@ -440,6 +446,9 @@ DamageBrick:
         ld d, WHITE_TILE
         ld e, WHITE_TILE
         push de
+        push bc
+        call CheckLevelClear
+        pop bc
         jp .update_tile
 .brick_damaged
         ld d, BRICK_LEFT_DAMAGED
@@ -516,6 +525,34 @@ BrickCollide:
 
 .bounce_right
         BounceBallRight
+        ret
+
+;; Check if we've cleared the level
+CheckLevelClear:
+        ld b, 0
+.level_loop
+        ld a, b
+        cp a, (BRICKS_PER_LINE * MAX_BRICK_LINES)
+        jr z, .level_clear
+
+        ld hl, wCurrentLevelData
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld a, [hl]
+        ld d, a
+        ld a, 0
+        ;; Check if there's currently a brick at the current position
+        cp a, d
+        ret c
+        inc b
+        jp .level_loop
+.level_clear
+        ld a, [wCurrentLevel]
+        inc a
+        ld [wCurrentLevel], a
+        call InitLevel
+        call InitGameObjects
         ret
 
 BallBrickCollisions:

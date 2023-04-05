@@ -1,7 +1,7 @@
 EXPORT Level0, Level0End
 
 EXPORT LevelTileTable, LevelTileTableEnd
-EXPORT InitLevel
+EXPORT InitLevel, SetFirstLevel
 EXPORT wCurrentLevel, wCurrentLevelData, wLevelTableX, wLevelTableY
 
 INCLUDE "src/include/hardware.inc"
@@ -17,9 +17,12 @@ wCurrentBlock: ds 1
 
 SECTION "Level functions", ROM0
 
-InitLevel:
+SetFirstLevel:
         ld a, 0
         ld [wCurrentLevel], a
+        ret
+
+InitLevel:
         call CopyCurrentLevel
         call DrawLevel
         ret
@@ -34,6 +37,17 @@ CopyCurrentLevel:
 
         ld hl, LevelArray
         add hl, bc
+
+        ;; If we're at the end of the level array: You win!
+        ld de, LevelArrayEnd
+        ld a, h
+        cp a, d
+        jr nz, .do_load
+        ld a, l
+        cp a, e
+        jp z, WinGame
+
+.do_load
         ld a, [hl]
         ld e, a
         inc hl

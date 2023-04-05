@@ -95,6 +95,7 @@ Init:
         call CopyDMARoutine
         call InitLevel
         call InitLives
+        call UpdateLives
         call InitGameObjects
         call InitAudio
         EnableLCD
@@ -327,6 +328,7 @@ BallDead:
 
         ld [wLives], a
         call InitGameObjects
+        call UpdateLives
 
         ret
 
@@ -627,4 +629,12 @@ DrawObjects:
         ld [paddle_2_oam_x], a
         add a, 8
         ld [paddle_3_oam_x], a
+        ret
+
+UpdateLives:
+        ld a, [wLives]
+        ld b, LIVES_TILE_START
+        add a, b
+        ld hl, _SCRN0 + LIVES_TILEMAP_POS
+        ld [hl], a
         ret

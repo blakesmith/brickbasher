@@ -69,7 +69,6 @@ SECTION "Working Variables", WRAM0
 DEF BALL_MOVE_RIGHT EQU 1 << 1
 DEF BALL_MOVE_UP    EQU 1 << 2
 
-wScore: ds 1
 wLives: ds 1
 wPaddleX: ds 1
 wFrameTick: ds 1
@@ -95,7 +94,6 @@ Init:
         call InitOAM
         call CopyDMARoutine
         call InitLevel
-        call InitScore
         call InitLives
         call InitGameObjects
         call InitAudio
@@ -190,11 +188,6 @@ InitAudio:
         ;; Start playing audio track
         ld hl, first_track
         call hUGE_init
-        ret
-
-InitScore:
-        ld a, 0
-        ld [wScore], a
         ret
 
 InitLives:
@@ -455,11 +448,6 @@ DamageBrick:
 ;; Once collision has happened, remove the brick from the level
 ;; Inputs: b register - The current index of the brick into the level that's been collided with
 BrickCollide:
-        ;; Bump the score
-        ld a, [wScore]
-        inc a
-        ld [wScore], a
-
         ;; Remove the tile from the current level
         call DamageBrick
 

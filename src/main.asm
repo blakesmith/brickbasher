@@ -317,6 +317,11 @@ MoveBall:
         ld [ball_oam_y], a
         jp .done
 
+BallDead:
+        call InitGameObjects
+
+        ret
+
 BallWallCollisions:
 .check_right
         ld a, [ball_oam_x]
@@ -347,8 +352,7 @@ BallWallCollisions:
         BounceBallDown
         jp .check_bottom
 .bounce_top
-        BounceBallUp
-        jp .done
+        jp BallDead
 
 BallPaddleCollisions:
         ;; Check y position, cheaper to return early on this one

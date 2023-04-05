@@ -256,6 +256,8 @@ Level1:
         db 2,2,2,2,0,0
         db 2,2,2,2,2,0
 
+;; Ordered list of levels. Once we get to the end of this list,
+;; you win the game.
 LevelArray:
         dw Level0,
         dw Level1,

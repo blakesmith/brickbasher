@@ -14,6 +14,11 @@ DEF PIXELS_PER_TILE EQU 8
 
 DEF PADDLE_Y EQU 128 + 16
 
+;; The pixel distance from the right or left of the paddle
+;; where we'd 'accelerate' the X velocity of the ball, because it
+;; hit the edge of the paddle.
+DEF PADDLE_EDGE_DISTANCE EQU 5
+
 DEF BRICKS_START EQU 33
 DEF BRICKS_PER_LINE EQU 6
 DEF MAX_BRICK_LINES EQU 5

@@ -243,12 +243,29 @@ InitGameObjects:
 
         ret
 
+;; Check to see if the ball hits the far right or left of the paddle (PADDLE_EDGE_DISTANCE), using some constant pixel distance.
+;; The ball should only accelerate if it's moving in the direction of the edge it hits.
+;;
+;; For example: If the ball is moving rightward, it should only accelerate if it hits the right side of the paddle.
+;; If the ball is moving leftward, it should only accelerate if it hits the left side of the paddle.
+;; Input registers:
+;; d: The pixel distance from the left of the paddle. 0x0 == more towards the left of the paddle.
+;; e: The overflow distance from the right of the paddle. 0xFF == more towards the right of the paddle.
 ToggleBallXVelocity:
-        ld a, [wBallVelocityX]
-        ld b, 2
-        cp a, b
-        jr z, .decrease_velocity
-        jr nz, .increase_velocity
+        ld a, [wBallMoveState]
+        and a, BALL_MOVE_RIGHT
+        jr nz, .check_right_edge_hit
+        jr z, .check_left_edge_hit
+.check_right_edge_hit
+        ld a, $FF - PADDLE_EDGE_DISTANCE
+        sub a, e
+        jr c, .increase_velocity
+        jr nc, .decrease_velocity
+ .check_left_edge_hit
+        ld a, PADDLE_EDGE_DISTANCE
+        sub a, d
+        jr nc, .increase_velocity
+        jr c, .decrease_velocity
 .decrease_velocity
         ld a, 1
         ld [wBallVelocityX], a
@@ -345,7 +362,8 @@ BallPaddleCollisions:
         sub a, 3 ; While the midpoint for a single sprite would be 4 pixels, the sprite stops one pixel before, so 3
         ld b, a
         ld a, [ball_oam_x]
-        cp a, b
+        sub a, b
+        ld d, a
         ret c
 
         ;; And check the ball x position is less than the right side of the paddle
@@ -353,7 +371,8 @@ BallPaddleCollisions:
         add a, 19 ; Since we're starting from the left most paddle sprite, add 16 (2 sprites), plus another 3 pixels to get to the end of the right most sprite
         ld b, a
         ld a, [ball_oam_x]
-        cp a, b
+        sub a, b
+        ld e, a
         ret nc
 
         ;; Collision: Bounce the ball

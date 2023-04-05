@@ -23,6 +23,8 @@ DEF BRICKS_START EQU 33
 DEF BRICKS_PER_LINE EQU 6
 DEF MAX_BRICK_LINES EQU 5
 
+;; How many lives do we get before game over.
+DEF LIVES_PER_GAME EQU 5
 
 ;; Tile mappings
 

@@ -70,6 +70,7 @@ DEF BALL_MOVE_RIGHT EQU 1 << 1
 DEF BALL_MOVE_UP    EQU 1 << 2
 
 wScore: ds 1
+wLives: ds 1
 wPaddleX: ds 1
 wFrameTick: ds 1
  
@@ -95,6 +96,7 @@ Init:
         call CopyDMARoutine
         call InitLevel
         call InitScore
+        call InitLives
         call InitGameObjects
         call InitAudio
         EnableLCD
@@ -194,6 +196,14 @@ InitScore:
         ld a, 0
         ld [wScore], a
         ret
+
+InitLives:
+        ld a, LIVES_PER_GAME
+        ld [wLives], a
+        ret
+
+GameOver:
+        jp GameOver
 
 InitGameObjects:
         ;; Setup paddle sprites
@@ -318,6 +328,11 @@ MoveBall:
         jp .done
 
 BallDead:
+        ld a, [wLives]
+        dec a
+        jp z, GameOver
+
+        ld [wLives], a
         call InitGameObjects
 
         ret

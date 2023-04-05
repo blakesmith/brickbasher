@@ -137,10 +137,10 @@ Main:
         call WaitVBlank
         call TickFrame
         call ReadInput
-        call MoveBall
         call BallWallCollisions
         call BallPaddleCollisions
         call BallBrickCollisions
+        call MoveBall
         call MovePaddle
         call DrawObjects
         call CopyOAM

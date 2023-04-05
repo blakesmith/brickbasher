@@ -25,9 +25,22 @@ InitLevel:
         ret
 
 CopyCurrentLevel:
-        ld de, Level0
+        ld d, 0
+        ld a, [wCurrentLevel]
+        ld e, a
+        ld c, 2
+        ld a, 0
+        call mul8
+
+        ld hl, LevelArray
+        add hl, bc
+        ld a, [hl]
+        ld e, a
+        inc hl
+        ld a, [hl]
+        ld d, a
         ld hl, wCurrentLevelData
-        ld bc, Level0End - Level0
+        ld bc, LEVEL_SIZE
         call Memcopy
         ret
 
@@ -197,8 +210,9 @@ LevelTileTable:
         db 96, 98, 100, 102, 104, 106
         db 128, 130, 132, 134, 136, 138
 LevelTileTableEnd:
+
         
-SECTION "Levels", ROM0
+SECTION "Levels", ROM0[$1300]
 
 ;; Level0:
 ;;         db 0,0,0,0,0,0
@@ -206,20 +220,29 @@ SECTION "Levels", ROM0
 ;;         db 0,0,0,0,0,0
 ;;         db 0,0,0,0,0,0
 ;;         db 0,0,2,0,0,0
-;; Level0End:
-
-Level0:
-        db 2,0,2,0,2,0
-        db 0,2,0,2,0,2
-        db 2,0,2,0,2,0
-        db 0,2,0,2,0,2
-        db 2,0,2,0,2,0
-Level0End:
 
 ;; Level0:
-;;         db 1,1,1,1,1,1
-;;         db 1,1,1,1,1,1
-;;         db 1,1,1,1,1,1
-;;         db 1,1,1,1,1,1
-;;         db 1,1,1,1,1,1
-;; Level0End:
+;;         db 2,0,2,0,2,0
+;;         db 0,2,0,2,0,2
+;;         db 2,0,2,0,2,0
+;;         db 0,2,0,2,0,2
+;;         db 2,0,2,0,2,0
+
+Level0:
+        db 2,2,2,2,2,2
+        db 2,2,2,2,2,2
+        db 2,2,2,2,2,2
+        db 2,2,2,2,2,2
+        db 2,2,2,2,2,2
+
+Level1:
+        db 2,0,0,0,0,0
+        db 2,2,0,0,0,0
+        db 2,2,2,0,0,0
+        db 2,2,2,2,0,0
+        db 2,2,2,2,2,0
+
+LevelArray:
+        dw Level0,
+        dw Level1,
+LevelArrayEnd:

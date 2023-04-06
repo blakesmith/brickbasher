@@ -70,6 +70,7 @@ DEF BALL_MOVE_RIGHT EQU 1 << 1
 DEF BALL_MOVE_UP    EQU 1 << 2
 
 wBallDead: ds 1
+wLevelClear: ds 1
 wLives: ds 1
 wPaddleX: ds 1
 wFrameTick: ds 1
@@ -95,6 +96,11 @@ MACRO CheckGameState
         ld b, 1
         cp a, b
         jp z, BallDead
+
+        ld a, [wLevelClear]
+        ld b, 1
+        cp a, b
+        jp z, NextLevel
 ENDM
 
 Init:
@@ -107,6 +113,7 @@ Init:
         call SetFirstLevel
         call InitLevel
         call InitLives
+        call UpdateLives
         EnableLCD
         InitDisplayRegisters
 
@@ -145,6 +152,10 @@ ReadyScreen:
         ld [wFrameTick], a
         ;; Number of times to overflow the tick counter
         ld c, 0
+
+        call InitGameObjects
+        call DrawObjects
+        call CopyOAM
 .loop
         call WaitVBlank
         call TickFrame
@@ -167,7 +178,23 @@ BallAlive:
         ld [wBallDead], a
         ret
 
+LevelNotClear:
+        ld a, 0
+        ld [wLevelClear], a
+        ret
+
+NextLevel:
+        ld a, [wCurrentLevel]
+        inc a
+        ld [wCurrentLevel], a
+        call InitLevel
+        call InitGameObjects
+        call DrawObjects
+        call CopyOAM
+        jp ReadyScreen
+
 GameInit:
+        call LevelNotClear
         call BallAlive
         call UpdateLives
         call InitGameObjects
@@ -591,11 +618,8 @@ CheckLevelClear:
         inc b
         jp .level_loop
 .level_clear
-        ld a, [wCurrentLevel]
-        inc a
-        ld [wCurrentLevel], a
-        call InitLevel
-        call InitGameObjects
+        ld a, 1
+        ld [wLevelClear], a
         ret
 
 BallBrickCollisions:

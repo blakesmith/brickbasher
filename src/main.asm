@@ -94,6 +94,9 @@ Init:
         call InitOAM
         call CopyDMARoutine
         call InitAudio
+        call SetFirstLevel
+        call InitLevel
+        call InitLives
         EnableLCD
         InitDisplayRegisters
 
@@ -150,9 +153,6 @@ ReadyScreen:
         jp .loop
 
 GameInit:
-        call SetFirstLevel
-        call InitLevel
-        call InitLives
         call UpdateLives
         call InitGameObjects
         jp Main
@@ -357,10 +357,7 @@ BallDead:
         jp z, GameOver
 
         ld [wLives], a
-        call InitGameObjects
-        call UpdateLives
-
-        ret
+        jp ReadyScreen
 
 BallWallCollisions:
 .check_right

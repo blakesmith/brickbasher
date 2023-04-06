@@ -69,6 +69,7 @@ SECTION "Working Variables", WRAM0
 DEF BALL_MOVE_RIGHT EQU 1 << 1
 DEF BALL_MOVE_UP    EQU 1 << 2
 
+wBallDead: ds 1
 wLives: ds 1
 wPaddleX: ds 1
 wFrameTick: ds 1
@@ -86,6 +87,15 @@ wBallVelocityY: ds 1
 SECTION "Header", ROM0[$100]
         jp Init
         ds $150 - @, 0          ; Make room for the header
+
+;; This is a macro to prevent stack pushes on each new game
+MACRO CheckGameState
+        ;; Check to see if the ball died
+        ld a, [wBallDead]
+        ld b, 1
+        cp a, b
+        jp z, BallDead
+ENDM
 
 Init:
         call WaitVBlank
@@ -152,13 +162,20 @@ ReadyScreen:
         inc c
         jp .loop
 
+BallAlive:
+        ld a, 0
+        ld [wBallDead], a
+        ret
+
 GameInit:
+        call BallAlive
         call UpdateLives
         call InitGameObjects
         jp Main
 
 Main:
         call WaitVBlank
+        CheckGameState
         call TickFrame
         call ReadInput
         call BallWallCollisions
@@ -375,10 +392,15 @@ BallWallCollisions:
 .check_bottom
         ld a, [ball_oam_y]
         cp a, PLAYFIELD_Y_BOTTOM
-        jp z, BallDead
+        jr z, .ball_dead
+
 .done
         ret
 
+.ball_dead
+        ld a, 1
+        ld [wBallDead], a
+        ret
 .bounce_left
         BounceBallLeft
         jp .check_left

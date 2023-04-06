@@ -93,19 +93,11 @@ Init:
         call InitTileData
         call InitOAM
         call CopyDMARoutine
-        call SetFirstLevel
-        call InitLevel
-        call InitLives
-        call UpdateLives
-        call InitGameObjects
         call InitAudio
         EnableLCD
         InitDisplayRegisters
 
-        ;; Initialize frame tick
-        ld a, 0
-        ld [wFrameTick], a
-        jp Main
+        jp ReadyScreen
 
 InitTileData:
         ; Copy tile data
@@ -132,6 +124,38 @@ InitTileData:
         call Memcopy
 
         ret
+
+DEF OVERFLOW_COUNT EQU 10
+ReadyScreen:
+        ;; Initialize frame tick
+        ld a, 0
+        ld [wFrameTick], a
+        ;; Number of times to overflow the tick counter
+        ld c, 0
+.loop
+        call WaitVBlank
+        call TickFrame
+
+        ld a, OVERFLOW_COUNT
+        cp a, c
+        jr z, GameInit
+
+        ld a, [wFrameTick]
+        ld b, $FF
+        cp a, b
+        jr nz, .loop
+        jp .overflow
+.overflow
+        inc c
+        jp .loop
+
+GameInit:
+        call SetFirstLevel
+        call InitLevel
+        call InitLives
+        call UpdateLives
+        call InitGameObjects
+        jp Main
 
 Main:
         call WaitVBlank

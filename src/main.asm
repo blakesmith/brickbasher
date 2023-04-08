@@ -145,8 +145,41 @@ InitTileData:
 
         ret
 
+DEF READY_TILE_R EQU 32
+DEF READY_MAP_START EQU 325
+DEF READY_LENGTH EQU 6
+ReadyDisplay:
+        ld b, 0
+        ld hl, _SCRN0 + READY_MAP_START
+.loop
+        ld a, READY_LENGTH
+        cp a, b
+        ret z
+
+        ld a, READY_TILE_R
+        add a, b
+        ld [hli], a
+        inc b
+        jp .loop
+
+ReadyHide:
+        ld b, 0
+        ld hl, _SCRN0 + READY_MAP_START
+.loop
+        ld a, READY_LENGTH
+        cp a, b
+        ret z
+
+        ld a, WHITE_TILE
+        ld [hli], a
+        inc b
+        jp .loop
+
+
 DEF OVERFLOW_COUNT EQU 10
 ReadyScreen:
+        call ReadyDisplay
+
         ;; Initialize frame tick
         ld a, 0
         ld [wFrameTick], a
@@ -198,6 +231,7 @@ GameInit:
         call BallAlive
         call UpdateLives
         call InitGameObjects
+        call ReadyHide
         jp Main
 
 Main:

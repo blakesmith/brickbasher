@@ -109,7 +109,6 @@ Init:
         call InitTileData
         call InitOAM
         call CopyDMARoutine
-        call InitAudio
         call SetFirstLevel
         call InitLevel
         call InitLives
@@ -203,6 +202,7 @@ ReadyHide:
 
 DEF OVERFLOW_COUNT EQU 10
 ReadyScreen:
+        call DisableAudio
         call ReadyDisplay
 
         ;; Initialize frame tick
@@ -257,6 +257,7 @@ GameInit:
         call UpdateLives
         call InitGameObjects
         call ReadyHide
+        call InitAudio
         jp Main
 
 Main:
@@ -317,6 +318,11 @@ InitAudio:
         ;; Start playing audio track
         ld hl, first_track
         call hUGE_init
+        ei
+        ret
+
+DisableAudio:
+        di
         ret
 
 InitLives:
@@ -332,6 +338,7 @@ DEF GAME_OVER_COUNT EQU 30
 GameOver:
         call HideGameObjects
         call ClearLevel
+        call DisableAudio
         call GameOverDisplay
 
         ;; Initialize frame tick

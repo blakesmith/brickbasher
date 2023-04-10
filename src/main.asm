@@ -145,6 +145,31 @@ InitTileData:
 
         ret
 
+
+DEF GAME_OVER_TILE_G EQU 40
+DEF GAME_OVER_MAP_START EQU 323
+GameOverDisplay:
+        ld hl, _SCRN0 + GAME_OVER_MAP_START
+        ld a, GAME_OVER_TILE_G
+        ld [hli], a ; G
+        inc a
+        ld [hli], a ; a
+        inc a
+        ld [hli], a ; m
+        inc a
+        ld [hli], a ; e
+        ld a, 0
+        ld [hli], a                    ; Space
+        ld a, GAME_OVER_TILE_G + 4
+        ld [hli], a ; O
+        inc a
+        ld [hli], a ; v
+        inc a
+        ld [hli], a ; e
+        inc a
+        ld [hl], a ; r
+        ret
+
 DEF READY_TILE_R EQU 32
 DEF READY_MAP_START EQU 325
 DEF READY_LENGTH EQU 6
@@ -303,9 +328,47 @@ WinGame:
         ;; TODO: Implement!
         jp WinGame
 
+DEF GAME_OVER_COUNT EQU 30
 GameOver:
-        ;; TODO: Implement!
-        jp GameOver
+        call HideGameObjects
+        call GameOverDisplay
+
+        ;; Initialize frame tick
+        ld a, 0
+        ld [wFrameTick], a
+        ;; Number of times to overflow the tick counter
+        ld c, 0
+
+        call DrawObjects
+        call CopyOAM
+.loop
+        call WaitVBlank
+        call TickFrame
+
+        ld a, GAME_OVER_COUNT
+        cp a, c
+        jp z, Init
+
+        ld a, [wFrameTick]
+        ld b, $FF
+        cp a, b
+        jr nz, .loop
+        jp .overflow
+.overflow
+        inc c
+        jp .loop
+
+HideGameObjects:
+        ld a, 0
+        ld [paddle_1_oam_x], a
+        ld [paddle_2_oam_x], a
+        ld [paddle_3_oam_x], a
+        ld [paddle_1_oam_y], a
+        ld [paddle_2_oam_y], a
+        ld [paddle_3_oam_y], a
+        ld [ball_oam_x], a
+        ld [ball_oam_y], a
+        ret
 
 InitGameObjects:
         ;; Setup paddle sprites

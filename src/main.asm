@@ -331,6 +331,7 @@ WinGame:
 DEF GAME_OVER_COUNT EQU 30
 GameOver:
         call HideGameObjects
+        call ClearLevel
         call GameOverDisplay
 
         ;; Initialize frame tick

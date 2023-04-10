@@ -1,7 +1,7 @@
 EXPORT Level0, Level0End
 
 EXPORT LevelTileTable, LevelTileTableEnd
-EXPORT InitLevel, SetFirstLevel
+EXPORT InitLevel, SetFirstLevel, ClearLevel
 EXPORT wCurrentLevel, wCurrentLevelData, wLevelTableX, wLevelTableY
 
 INCLUDE "src/include/hardware.inc"
@@ -211,6 +211,40 @@ DrawLevel:
         add hl, de
         jr .draw
 
+;; Clears the current level data completely, including the level data itself, and the tilemap
+ClearLevel:
+        ld b, 0
+.loop
+        ld a, (MAX_BRICK_LINES * BRICKS_PER_LINE)
+        cp a, b
+        ret z
+
+        ;; Clear out the level data first
+        ld hl, wCurrentLevelData
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld [hl], 0
+
+        ;; Then, clear out the tile in the background tilemap
+        ld hl, LevelTileTable
+        ld d, 0
+        ld e, b
+        add hl, de
+        ld a, [hl]
+        ld d, 0
+        ld e, a
+        ld hl, _SCRN0 + BRICKS_START
+        add hl, de
+        ld d, WHITE_TILE
+        ld e, WHITE_TILE
+        ld a, d
+        ld [hli], a
+        ld a, e
+        ld [hl], a
+
+        inc b
+        jp .loop
 
 SECTION "LevelTileTable", ROM0
 

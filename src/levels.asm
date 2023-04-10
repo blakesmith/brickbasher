@@ -290,9 +290,17 @@ Level1:
         db 2,2,2,2,0,0
         db 2,2,2,2,2,0
 
+Level2:
+        db 2,2,2,2,2,2
+        db 0,0,0,0,0,0
+        db 2,2,2,2,2,2
+        db 0,0,0,0,0,0
+        db 2,2,2,2,2,2
+
 ;; Ordered list of levels. Once we get to the end of this list,
 ;; you win the game.
 LevelArray:
         dw Level0,
         dw Level1,
+        dw Level2,
 LevelArrayEnd:

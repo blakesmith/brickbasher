@@ -1,13 +1,10 @@
-{ pkgs ? import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/release-22.11.tar.gz") {},
-  lib ? pkgs.lib,
-  stdenv ? pkgs.stdenv
-}:
+{ pkgs, stdenv }:
 
 with pkgs;
 
 stdenv.mkDerivation rec {
   pname = "hugetracker";
-  version = "1.0.0";
+  version = "1.0.1";
 
   src = fetchFromGitHub {
     owner = "SuperDisk";

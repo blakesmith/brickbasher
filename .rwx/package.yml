@@ -1,0 +1,40 @@
+on:
+  github:
+    push:
+      init:
+        commit-sha: ${{ event.git.sha }}
+  cli:
+    init:
+      commit-sha: ${{ event.git.sha }}
+
+base:
+  image: ubuntu:24.04
+  config: rwx/base 1.2.0
+
+tasks:
+  - key: install-nix
+    run: |
+      curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --no-daemon
+      echo "Nix is installed at: $(which nix)"
+  - key: code
+    call: git/clone 2.1.0
+    with:
+      repository: https://github.com/blakesmith/brickbasher.git
+      ref: ${{ init.commit-sha }}
+      github-token: ${{ github.token }}
+  - key: nix-shell
+    run: nix develop '.#' --extra-experimental-features nix-command --extra-experimental-features flakes
+    use: [install-nix, code]
+  - key: build-brickbasher
+    run: |
+      BUILD_OUT=$(nix build '.#' \
+        --extra-experimental-features nix-command \
+        --extra-experimental-features flakes \
+        --print-out-paths \
+        --no-link)
+      cp $BUILD_OUT/share/brickbasher.gb ./brickbasher.gb
+    use: [nix-shell]
+    outputs:
+      artifacts:
+        - key: rom
+          path: brickbasher.gb
